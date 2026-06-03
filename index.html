@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Move-Out Planner</title>
+<style>
+/* ============================================================
+   MOVE-OUT PLANNER — single file, no dependencies, offline-first
+   Aesthetic: warm paper, deep teal ink, calm and reassuring.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans:wght@400;500;600&display=swap');
+
+:root{
+  --paper:#f6f1e7;
+  --paper-2:#fffdf8;
+  --card:#fffdf8;
+  --ink:#23302e;
+  --ink-soft:#5a6864;
+  --ink-faint:#8a958f;
+  --teal:#15605a;
+  --teal-deep:#0d423e;
+  --teal-soft:#dcebe6;
+  --rust:#b1542e;
+  --gold:#c08a2d;
+  --green:#3d7a4f;
+  --line:#e3dccd;
+  --line-2:#d3cab6;
+  --shadow:0 1px 2px rgba(35,48,46,.06),0 8px 24px -12px rgba(35,48,46,.18);
+  --radius:14px;
+  --maxw:920px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  background-image:radial-gradient(circle at 12% 8%,rgba(21,96,90,.04),transparent 40%),radial-gradient(circle at 88% 0%,rgba(192,138,45,.05),transparent 35%);
+  color:var(--ink);
+  font-family:'Spline Sans',system-ui,sans-serif;
+  font-size:16px;line-height:1.55;
+  -webkit-text-size-adjust:100%;
+  padding-bottom:80px;
+}
+h1,h2,h3{font-family:'Fraunces',Georgia,serif;font-weight:500;line-height:1.12;margin:0}
+a{color:var(--teal)}
+button{font-family:inherit}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+
+/* ---- layout shell ---- */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 18px}
+header.masthead{
+  padding:34px 18px 20px;max-width:var(--maxw);margin:0 auto;
+}
+.masthead .kicker{font-family:'Newsreader',serif;font-style:italic;color:var(--teal);font-size:1.05rem;letter-spacing:.01em}
+.masthead h1{font-size:clamp(2rem,7vw,3rem);letter-spacing:-.02em;margin-top:2px}
+.masthead .sub{color:var(--ink-soft);max-width:46ch;margin-top:8px}
+
+/* ---- sticky nav ---- */
+nav.tabs{
+  position:sticky;top:0;z-index:30;
+  background:rgba(246,241,231,.82);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs .inner{display:flex;gap:2px;max-width:var(--maxw);margin:0 auto;padding:8px 12px}
+nav.tabs button{
+  flex:0 0 auto;border:none;background:none;cursor:pointer;
+  padding:8px 13px;border-radius:999px;color:var(--ink-soft);
+  font-size:.92rem;font-weight:500;white-space:nowrap;transition:.18s;
+}
+nav.tabs button:hover{color:var(--ink)}
+nav.tabs button.active{background:var(--teal);color:#fff;box-shadow:var(--shadow)}
+
+/* ---- cards ---- */
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;margin:18px 0;box-shadow:var(--shadow);
+}
+.card > h2{font-size:1.45rem;letter-spacing:-.01em;display:flex;align-items:baseline;gap:10px}
+.card > h2 .n{font-family:'Newsreader',serif;font-style:italic;font-size:.8rem;color:var(--teal);font-weight:400}
+.card .lead{color:var(--ink-soft);margin:6px 0 0;font-size:.95rem}
+.section-intro{color:var(--ink-soft);font-size:.95rem;margin:2px 0 16px}
+
+.panel{display:none}
+.panel.active{display:block;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---- buttons ---- */
+.btn{
+  border:1px solid var(--line-2);background:var(--paper-2);color:var(--ink);
+  padding:9px 15px;border-radius:10px;cursor:pointer;font-size:.9rem;font-weight:500;
+  transition:.15s;display:inline-flex;align-items:center;gap:7px;
+}
+.btn:hover{border-color:var(--teal);color:var(--teal)}
+.btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.btn.primary:hover{background:var(--teal-deep);color:#fff}
+.btn.ghost{background:none;border-color:transparent;color:var(--ink-soft)}
+.btn.ghost:hover{color:var(--rust);border-color:transparent}
+.btn.sm{padding:5px 10px;font-size:.82rem;border-radius:8px}
+.btn-row{display:flex;flex-wrap:wrap;gap:9px}
+
+/* ---- inputs ---- */
+label.field{display:block;font-size:.82rem;color:var(--ink-soft);font-weight:500;margin-bottom:5px}
+input[type=date],input[type=number],input[type=text],select,textarea{
+  width:100%;padding:9px 11px;border:1px solid var(--line-2);border-radius:9px;
+  background:var(--paper-2);transition:.15s;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-soft)}
+textarea{resize:vertical;min-height:38px;line-height:1.4}
+
+/* ---- dashboard ---- */
+.hero{
+  background:linear-gradient(135deg,var(--teal-deep),var(--teal));
+  color:#fff;border-radius:var(--radius);padding:26px 24px;margin:18px 0;
+  box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.hero::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06)}
+.hero .big{font-family:'Fraunces',serif;font-size:clamp(2.6rem,12vw,4.2rem);line-height:1;font-weight:600;letter-spacing:-.02em}
+.hero .big.none{font-size:1.3rem;font-weight:500;opacity:.92}
+.hero .label{text-transform:uppercase;letter-spacing:.12em;font-size:.7rem;opacity:.8;font-weight:600}
+.hero .date-line{margin-top:8px;font-family:'Newsreader',serif;font-style:italic;font-size:1.05rem;opacity:.92}
+.hero .date-input{margin-top:14px}
+.hero input[type=date]{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff;max-width:220px}
+.hero input[type=date]::-webkit-calendar-picker-indicator{filter:invert(1)}
+
+.rings{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;margin:18px 0}
+.ring-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;text-align:center;box-shadow:var(--shadow)}
+.ring{position:relative;width:84px;height:84px;margin:0 auto 8px}
+.ring svg{transform:rotate(-90deg)}
+.ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:1.05rem;font-family:'Fraunces',serif}
+.ring-card .rl{font-size:.82rem;color:var(--ink-soft);font-weight:500}
+.ring-card .rsub{font-size:.72rem;color:var(--ink-faint);margin-top:2px}
+
+.margin-box{display:flex;flex-wrap:wrap;gap:14px;align-items:stretch}
+.margin-fig{flex:1 1 140px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px}
+.margin-fig .label{font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);font-weight:600}
+.margin-fig .v{font-family:'Fraunces',serif;font-size:1.7rem;font-weight:600;margin-top:3px}
+.margin-fig.result .v.pos{color:var(--green)}
+.margin-fig.result .v.neg{color:var(--rust)}
+.margin-note{font-size:.85rem;color:var(--ink-soft);margin-top:10px}
+
+/* ---- timeline ---- */
+.housing-toggle{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px}
+.housing-toggle button{
+  border:1px solid var(--line-2);background:var(--paper-2);color:var(--ink-soft);
+  padding:7px 14px;border-radius:999px;cursor:pointer;font-size:.86rem;font-weight:500;transition:.15s;
+}
+.housing-toggle button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.month-block{margin:0 0 6px;border-top:1px solid var(--line);padding-top:14px}
+.month-block:first-child{border-top:none;padding-top:0}
+.month-head{display:flex;align-items:baseline;gap:10px;cursor:pointer;user-select:none}
+.month-head h3{font-size:1.15rem}
+.month-head .when{font-family:'Newsreader',serif;font-style:italic;color:var(--teal);font-size:.9rem}
+.month-head .mprog{margin-left:auto;font-size:.8rem;color:var(--ink-faint)}
+.month-head .chev{color:var(--ink-faint);transition:.2s}
+.month-block.collapsed .chev{transform:rotate(-90deg)}
+.month-block.collapsed .task-list{display:none}
+.task-list{margin:10px 0 18px}
+.task{display:flex;gap:11px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.task:last-child{border-bottom:none}
+.task .cb{flex:0 0 auto;margin-top:2px}
+.cb input{width:20px;height:20px;accent-color:var(--teal);cursor:pointer}
+.task .body{flex:1;min-width:0}
+.task .title{font-weight:500;cursor:pointer}
+.task .task-desc{font-size:.84rem;color:var(--ink-soft);margin-top:4px;line-height:1.45;max-width:62ch}
+.task.done .title{color:var(--ink-faint);text-decoration:line-through}
+.task .tag{display:inline-block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;padding:1px 7px;border-radius:999px;margin-left:7px;vertical-align:middle;font-weight:600}
+.tag.money{background:#f3ead4;color:var(--gold)}
+.tag.docs{background:var(--teal-soft);color:var(--teal)}
+.tag.hunt{background:#f1ddd2;color:var(--rust)}
+.tag.move{background:#dfe9df;color:var(--green)}
+.tag.life{background:#e8e3d6;color:var(--ink-soft)}
+.task .meta{margin-top:6px;display:none;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.task.show-meta .meta{display:flex}
+.task .meta .mini{flex:0 0 auto}
+.task .meta .mini label{font-size:.72rem}
+.task .meta .mini input[type=date]{width:auto;padding:6px 9px;font-size:.85rem}
+.task .meta .notes{flex:1 1 200px}
+.task .toggle-notes{font-size:.78rem;color:var(--teal);cursor:pointer;background:none;border:none;padding:2px 0;margin-top:4px}
+
+/* ---- upcoming ---- */
+.upc-group{margin-bottom:18px}
+.upc-group h3{font-size:1.05rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.upc-group.overdue h3{color:var(--rust)}
+.upc-group.duenow h3{color:var(--teal-deep)}
+.upc-group.ahead h3{color:var(--ink-faint)}
+.upc-group .badge{font-size:.7rem;background:var(--rust);color:#fff;padding:1px 8px;border-radius:999px;font-family:'Spline Sans',sans-serif;font-weight:600}
+.upc-group.duenow .badge{background:var(--teal)}
+.upc-item{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line)}
+.upc-item:last-child{border-bottom:none}
+.upc-body{flex:1;min-width:0}
+.upc-title{line-height:1.35}
+.upc-when{font-size:.76rem;color:var(--ink-faint);margin-top:1px}
+.upc-when.late{color:var(--rust);font-weight:600}
+.upc-empty{color:var(--ink-faint);font-style:italic}
+.upc-divider{display:flex;align-items:center;text-align:center;margin:6px 0 16px;color:var(--ink-faint)}
+.upc-divider span{font-size:.78rem;font-style:italic;font-family:'Newsreader',serif;padding:0 12px}
+.upc-divider::before,.upc-divider::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ---- tables ---- */
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px}
+table{border-collapse:collapse;width:100%;min-width:420px}
+th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line)}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:600}
+td input{padding:6px 8px;border:1px solid transparent;background:transparent;border-radius:7px}
+td input:hover{border-color:var(--line)}
+td input:focus{border-color:var(--teal);background:var(--paper-2)}
+th[contenteditable]{outline:none;cursor:text;color:var(--ink)}
+th[contenteditable]:focus{color:var(--teal)}
+tfoot th{font-family:'Fraunces',serif;font-size:1rem;color:var(--ink);text-transform:none}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.del-col{width:32px}
+.del-x{border:none;background:none;color:var(--ink-faint);cursor:pointer;font-size:1.1rem;line-height:1}
+.del-x:hover{color:var(--rust)}
+
+/* ---- checklist generic ---- */
+.checkrow{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--line)}
+.checkrow:last-child{border-bottom:none}
+.checkrow .body{flex:1}
+.checkrow.done .lbl{color:var(--ink-faint);text-decoration:line-through}
+.checkrow .sub{font-size:.82rem;color:var(--ink-soft);margin-top:1px}
+.cat-head{font-family:'Fraunces',serif;font-size:1.1rem;margin:18px 0 4px;color:var(--teal-deep)}
+.cat-head:first-of-type{margin-top:4px}
+
+/* ---- savings ---- */
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}
+.bar > span{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--green));border-radius:99px;transition:width .4s}
+.proj{background:var(--paper);border:1px dashed var(--line-2);border-radius:12px;padding:14px;margin-top:14px}
+.proj .v{font-family:'Fraunces',serif;font-size:1.3rem;color:var(--teal-deep);font-weight:600}
+.proj.guard{color:var(--ink-soft);font-style:italic}
+
+/* ---- data section ---- */
+.data-note{font-size:.88rem;color:var(--ink-soft);background:var(--paper);border-left:3px solid var(--teal);padding:10px 14px;border-radius:0 8px 8px 0;margin:14px 0}
+
+/* ---- finding a place ---- */
+.ftable{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:6px}
+.frow{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);align-items:baseline}
+.frow:last-child{border-bottom:none}
+.frow.fhead{background:var(--paper);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);font-weight:600}
+.frow > div:nth-child(2),.frow > div:nth-child(3){font-variant-numeric:tabular-nums}
+.frow:not(.fhead) > div:nth-child(3){color:var(--teal-deep);font-weight:600;font-family:'Fraunces',serif}
+.fsub{display:block;font-size:.78rem;color:var(--ink-faint);font-weight:400;font-family:'Spline Sans',sans-serif;margin-top:2px}
+.finding-h3{font-family:'Fraunces',serif;font-size:1.15rem;color:var(--teal-deep);margin:24px 0 10px}
+.link-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.linkcard{display:block;text-decoration:none;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:12px 14px;transition:.15s}
+.linkcard:hover{border-color:var(--teal);box-shadow:var(--shadow);transform:translateY(-1px)}
+.linkcard strong{display:block;color:var(--teal);font-size:.95rem}
+.linkcard span{display:block;font-size:.8rem;color:var(--ink-soft);margin-top:3px;line-height:1.4}
+@media(max-width:560px){
+  .frow{grid-template-columns:1fr;gap:4px;padding:12px}
+  .frow.fhead{display:none}
+  .frow > div:nth-child(2)::before{content:"Range: ";color:var(--ink-faint);font-weight:400}
+  .frow > div:nth-child(3)::before{content:"Plan around: ";color:var(--ink-faint);font-weight:400;font-family:'Spline Sans',sans-serif}
+}
+
+/* ---- modal ---- */
+.modal-back{position:fixed;inset:0;background:rgba(35,48,46,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-back.open{display:flex;animation:fade .2s}
+.modal{background:var(--card);border-radius:var(--radius);padding:24px;max-width:420px;width:100%;box-shadow:0 20px 60px -20px rgba(0,0,0,.4)}
+.modal h3{font-size:1.3rem;margin-bottom:8px}
+.modal p{color:var(--ink-soft);font-size:.92rem}
+.modal .btn-row{margin-top:18px}
+
+/* ---- toast ---- */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--teal-deep);color:#fff;padding:11px 20px;border-radius:99px;font-size:.9rem;opacity:0;transition:.25s;z-index:120;pointer-events:none;box-shadow:var(--shadow)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.empty-hint{color:var(--ink-faint);font-style:italic;padding:8px 0}
+footer.foot{max-width:var(--maxw);margin:30px auto 0;padding:18px;color:var(--ink-faint);font-size:.82rem;text-align:center;border-top:1px solid var(--line)}
+.add-inline{display:flex;gap:8px;margin-top:12px}
+.add-inline input{flex:1}
+
+@media(max-width:560px){
+  .card{padding:18px 15px}
+  .hero{padding:22px 18px}
+  .margin-fig{flex:1 1 100%}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="kicker">A one-year runway to your own place</div>
+  <h1>Move-Out Planner</h1>
+  <p class="sub">Money first, keys last. Track savings, documents, and the apartment hunt — all stored privately on this device.</p>
+</header>
+
+<nav class="tabs"><div class="inner" id="tabbar"></div></nav>
+
+<main class="wrap">
+
+  <!-- DASHBOARD -->
+  <section class="panel" data-panel="dashboard">
+    <div class="hero">
+      <div class="label">Target move-in date</div>
+      <div class="big" id="daysBig">—</div>
+      <div class="date-line" id="dateLine">Set your date to start the countdown</div>
+      <div class="date-input"><input type="date" id="moveDate"></div>
+    </div>
+
+    <div class="rings" id="rings"></div>
+
+    <div class="card">
+      <h2><span class="n">01</span> Can I actually afford this?</h2>
+      <p class="lead">Your income against the budget scenario you're leaning toward. This is the number that matters most.</p>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin:16px 0">
+        <div style="flex:1 1 120px"><label class="field">Hourly wage ($)</label><input type="number" id="wage" min="0" step="0.25"></div>
+        <div style="flex:1 1 120px"><label class="field">Hours / week</label><input type="number" id="hours" min="0" step="1"></div>
+        <div style="flex:1 1 160px"><label class="field">Compare against</label><select id="marginScenario"></select></div>
+      </div>
+      <div class="margin-box">
+        <div class="margin-fig"><div class="label">Est. monthly income</div><div class="v" id="mIncome">$0</div></div>
+        <div class="margin-fig"><div class="label">Scenario expenses</div><div class="v" id="mExpense">$0</div></div>
+        <div class="margin-fig result"><div class="label">Monthly margin</div><div class="v" id="mMargin">$0</div></div>
+      </div>
+      <p class="margin-note" id="marginNote"></p>
+    </div>
+  </section>
+
+  <!-- UPCOMING -->
+  <section class="panel" data-panel="upcoming">
+    <div class="card">
+      <h2><span class="n">02</span> What needs doing now</h2>
+      <p class="lead">Overdue items, this month, and next month — pulled automatically from your timeline.</p>
+      <div id="upcoming" style="margin-top:16px"></div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="panel" data-panel="timeline">
+    <div class="card">
+      <h2><span class="n">03</span> The 12-month timeline</h2>
+      <p class="section-intro">Tasks reflow around your move-in date. Filter by the kind of housing you're considering — money and document tasks apply no matter what.</p>
+      <div class="housing-toggle" id="housingToggle"></div>
+      <div id="timeline" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- FINDING A PLACE (+ housing comparison) -->
+  <section class="panel" data-panel="finding">
+    <div class="card">
+      <h2><span class="n">04</span> Finding a place</h2>
+      <p class="section-intro">A quick lay of the land for the Bangor, Maine area, so you know what's realistic before you start scrolling listings. These are <em>starter-place</em> numbers — the bottom third of the market, where a first apartment actually lives — not the glossy averages.</p>
+
+      <div class="ftable">
+        <div class="frow fhead"><div>Type</div><div>Realistic monthly range</div><div>Plan around</div></div>
+        <div class="frow"><div><strong>Room in a shared place</strong><span class="fsub">A bedroom in someone's house/apartment, shared kitchen &amp; bath</span></div><div>$700 – $1,050</div><div>$775 <span class="fsub">+ utilities if not bundled</span></div></div>
+        <div class="frow"><div><strong>Studio apartment</strong><span class="fsub">One room + kitchenette + bath, all yours</span></div><div>$800 – $1,069</div><div>$950</div></div>
+        <div class="frow"><div><strong>1-bedroom apartment</strong><span class="fsub">Separate bedroom; the common "real first apartment"</span></div><div>$1,100 – $1,390</div><div>$1,150</div></div>
+        <div class="frow"><div><strong>Half of a 2-bedroom (with a roommate)</strong><span class="fsub">Splitting a $1,525–1,700 unit two ways</span></div><div>$760 – $850 each</div><div>$800 <span class="fsub">+ split utilities</span></div></div>
+      </div>
+
+      <p class="margin-note" style="margin-top:14px">The published <em>average</em> 1-bedroom rent is around $1,237 — but that's skewed by newer, advertised units. Older buildings and spots a little outside the center run noticeably cheaper, and roughly two dozen units under $1,000 are typically available at any given time. <strong>Winter is the cheapest, least competitive time to look.</strong> A car is the biggest swing in the budget — if you can walk, bike, or use the Community Connector bus, dropping it frees up a lot.</p>
+
+      <h3 class="finding-h3">Where to look</h3>
+      <div class="link-grid">
+        <a class="linkcard" href="https://www.apartments.com/bangor-me/under-1000/" target="_blank" rel="noopener"><strong>Apartments.com</strong><span>Largest inventory; filter by price &amp; bedrooms. Has an under-$1,000 view.</span></a>
+        <a class="linkcard" href="https://www.zillow.com/bangor-me/apartments/" target="_blank" rel="noopener"><strong>Zillow</strong><span>Good map view; price-cap filters down to under $700.</span></a>
+        <a class="linkcard" href="https://www.rentable.co/bangor-me" target="_blank" rel="noopener"><strong>Rentable</strong><span>Daily-updated listings with the cheapest-tier filters.</span></a>
+        <a class="linkcard" href="https://www.spareroom.com/rooms-for-rent/me/penobscot_county" target="_blank" rel="noopener"><strong>SpareRoom</strong><span>Rooms &amp; roommate matching in Penobscot County.</span></a>
+        <a class="linkcard" href="https://www.roomies.com/rooms/bangor-me" target="_blank" rel="noopener"><strong>Roomies</strong><span>Room rentals; many list whether utilities are included.</span></a>
+        <a class="linkcard" href="https://maine.craigslist.org/search/roo#search=1~gallery~0~0" target="_blank" rel="noopener"><strong>Craigslist (Maine)</strong><span>Rooms &amp; shares — often the cheapest, but verify in person.</span></a>
+        <a class="linkcard" href="https://classifieds.bangordailynews.com/me-bangor/rentals/" target="_blank" rel="noopener"><strong>Bangor Daily News classifieds</strong><span>Local landlords who don't always post to big sites.</span></a>
+      </div>
+
+      <h3 class="finding-h3">Local landlords &amp; property managers</h3>
+      <p class="margin-note" style="margin-top:0">Smaller management companies sometimes have units that never hit the big listing sites — worth a direct call.</p>
+      <div class="link-grid">
+        <a class="linkcard" href="tel:+12079746606"><strong>Rent Bangor (Marsh Property Mgmt)</strong><span>Hermon · (207) 974-6606</span></a>
+        <a class="linkcard" href="tel:+12079428003"><strong>Maine Real Estate Management</strong><span>Downtown Bangor · (207) 942-8003</span></a>
+        <a class="linkcard" href="tel:+12072620199"><strong>Bangor Home Rentals</strong><span>(207) 262-0199</span></a>
+        <a class="linkcard" href="tel:+12079476979"><strong>Trott Properties</strong><span>(207) 947-6979</span></a>
+      </div>
+
+      <div class="data-note" style="margin-top:18px">Ranges reflect the Bangor-area market as of mid-2026 and will drift over time. Treat them as a starting sense of scale, not a quote — always confirm current prices on the listing itself.</div>
+    </div>
+
+    <div class="card">
+      <h2>Compare your real locations</h2>
+      <p class="section-intro">As you find actual places, line them up side by side here. Rename each to a real listing and fill in what you learn on tours.</p>
+      <div class="tbl-scroll"><table id="housingTable"></table></div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn sm" id="addHousing">+ Add location</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MONEY (budget + savings + log) -->
+  <section class="panel" data-panel="money">
+    <div class="card">
+      <h2><span class="n">05</span> Budget scenarios</h2>
+      <p class="section-intro">Defaults are bottom-third central-Maine figures — edit everything. Add or remove scenarios and rows freely.</p>
+      <div class="tbl-scroll"><table id="budgetTable"></table></div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn sm" id="addBudgetRow">+ Add expense row</button>
+        <button class="btn sm" id="addScenario">+ Add scenario</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">06</span> Savings goal</h2>
+      <p class="section-intro">What you need before move-in day. Deposit, first month, a cushion — the upfront wall most first-timers underestimate.</p>
+      <div class="tbl-scroll"><table id="goalTable"></table></div>
+      <div class="btn-row" style="margin-top:12px"><button class="btn sm" id="addGoal">+ Add goal</button></div>
+      <div style="margin-top:18px">
+        <div style="display:flex;justify-content:space-between;font-size:.9rem"><span>Saved so far</span><strong id="savedVsGoal">$0 / $0</strong></div>
+        <div class="bar"><span id="goalBar" style="width:0%"></span></div>
+      </div>
+      <div class="proj" id="projBox"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">07</span> Savings log</h2>
+      <p class="section-intro">Log deposits as they happen. More accurate than guessing a monthly number.</p>
+      <div class="add-inline">
+        <input type="date" id="txnDate">
+        <input type="number" id="txnAmt" placeholder="Amount $" step="0.01">
+        <button class="btn primary sm" id="addTxn">Add</button>
+      </div>
+      <div id="txnList" style="margin-top:14px"></div>
+    </div>
+  </section>
+
+  <!-- INVENTORY -->
+  <section class="panel" data-panel="inventory">
+    <div class="card">
+      <h2><span class="n">08</span> Household inventory</h2>
+      <p class="section-intro">What you'll need on day one. Check off what you already own or have bought.</p>
+      <div id="inventory" style="margin-top:8px"></div>
+      <div class="add-inline">
+        <input type="text" id="newCat" placeholder="New category name…">
+        <button class="btn sm" id="addCat">+ Category</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOCUMENTS -->
+  <section class="panel" data-panel="documents">
+    <div class="card">
+      <h2><span class="n">09</span> Documents &amp; credit</h2>
+      <p class="section-intro">Landlords decide fast. Having these ready — and knowing your credit situation early — is often what separates an approved application from a lost apartment.</p>
+      <div id="documents" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- INSPECTION -->
+  <section class="panel" data-panel="inspection">
+    <div class="card">
+      <h2><span class="n">10</span> Move-in inspection</h2>
+      <p class="section-intro">Do this <em>before</em> you unpack a single box. Timestamped photos tied to your lease are the single best way to get your deposit back.</p>
+      <div id="inspection" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- DATA -->
+  <section class="panel" data-panel="data">
+    <div class="card">
+      <h2><span class="n">11</span> Save &amp; share</h2>
+      <p class="section-intro">Everything lives only on this device. Use these to back up, move to another device, or share progress.</p>
+      <div class="data-note">No accounts, no cloud, no tracking. Your data never leaves this device unless you export it yourself.</div>
+      <div class="btn-row">
+        <button class="btn primary" id="exportBtn">⬇ Export full backup (JSON)</button>
+        <button class="btn" id="summaryBtn">📄 Export progress summary</button>
+        <button class="btn" id="importBtn">⬆ Import backup</button>
+        <button class="btn ghost" id="resetBtn">Reset everything…</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+      <p class="margin-note" style="margin-top:16px">The <strong>progress summary</strong> creates a readable page you can hand to a parent — move date, what's done, savings vs. goal, what's overdue — without them needing this app.</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <a href="#" id="findingJump" style="font-weight:500">→ Apartment-finding overview &amp; listing sites</a>
+    <div style="margin-top:8px">Move-Out Planner · runs entirely in your browser · nothing is uploaded anywhere</div>
+  </footer>
+</main>
+
+<!-- reset modal -->
+<div class="modal-back" id="resetModal">
+  <div class="modal">
+    <h3>Back up before resetting?</h3>
+    <p>This will erase all your checklists, budgets, savings, and notes. Download a backup first so nothing is lost.</p>
+    <div class="btn-row">
+      <button class="btn primary" id="resetBackup">Download backup</button>
+      <button class="btn ghost" id="resetAnyway">Reset anyway</button>
+      <button class="btn" id="resetCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+   STATE + SEED DATA
+   ===================================================================== */
+const SCHEMA = 5;
+const KEY = 'moveoutPlanner.v5';
+
+const HOUSING_TYPES = [
+  {id:'undecided', label:'Undecided'},
+  {id:'apartment', label:'Solo apartment'},
+  {id:'shared',    label:'Shared / roommates'}
+];
+
+/* Timeline seed. offsetMonths is relative to move-in (negative = before).
+   appliesTo lists housing types; 'all' means every path.
+   Optional `desc` renders as a one-line explanation under the title.
+   Renting reality: money + readiness fill months -12..-3; the actual
+   apartment hunt compresses into the final ~6-8 weeks. A recurring
+   "deposit to savings" item appears every month as a behavior nudge —
+   the actual amounts get logged in the Savings log on the Money tab. */
+const SEED_TASKS = [
+  // -12
+  {id:'t01', off:-12, cat:'money', applies:['all'], title:'Open a separate savings account just for the move'},
+  {id:'t02', off:-12, cat:'money', applies:['all'], title:'Set a rough total savings goal', desc:'Add up the one-time costs you\'ll need before you get the keys: a security deposit (usually one month\'s rent), your first month\'s rent, and a cushion for surprises. That total is your target — set it on the Money tab.'},
+  {id:'t03', off:-12, cat:'life',  applies:['all'], title:'Talk through the big choice: apartment vs. roommates'},
+  {id:'dep-12', off:-12, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // -11
+  {id:'t04', off:-11, cat:'money', applies:['all'], title:'Build a first draft budget for each option'},
+  {id:'t05', off:-11, cat:'money', applies:['all'], title:'Pin down your real monthly income (after taxes)'},
+  {id:'t06', off:-11, cat:'docs',  applies:['all'], title:'Check your credit score (free) — know where you stand early'},
+  {id:'dep-11', off:-11, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // -10
+  {id:'t07', off:-10, cat:'money', applies:['all'], title:'Start automatic transfers into the move fund'},
+  {id:'t08', off:-10, cat:'docs',  applies:['apartment','shared'], title:'If credit is thin: line up a possible co-signer / guarantor', desc:'A co-signer (often a parent) promises to cover rent if you can\'t. With little or no rental history, having one lined up early can be the difference between approval and rejection.'},
+  {id:'t09', off:-10, cat:'life',  applies:['all'], title:'Decide whether the car stays in the budget or goes'},
+  {id:'dep-10', off:-10, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // -9
+  {id:'t11', off:-9, cat:'money', applies:['all'], title:'Review the budget against 3 months of real spending'},
+  {id:'dep-9', off:-9, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // -8
+  {id:'t12', off:-8, cat:'money', applies:['all'], title:'Hit ~25% of your savings goal — check the pace'},
+  {id:'t13', off:-8, cat:'life',  applies:['shared'], title:'Start serious roommate conversations — who, and house rules'},
+  {id:'dep-8', off:-8, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // -7
+  {id:'dep-7', off:-7, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // -6
+  {id:'t14', off:-6, cat:'money', applies:['all'], title:'Hit ~50% of your savings goal'},
+  {id:'t15', off:-6, cat:'docs',  applies:['all'], title:'Gather paperwork: ID, SSN card, pay stubs, bank statements'},
+  {id:'t16', off:-6, cat:'docs',  applies:['apartment','shared'], title:'Collect 2-3 references (employer, past landlord, mentor)'},
+  {id:'dep-6', off:-6, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // -5
+  {id:'dep-5', off:-5, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // -4
+  {id:'t17', off:-4, cat:'money', applies:['all'], title:'Aim to have deposit + first month fully saved'},
+  {id:'t18', off:-4, cat:'life',  applies:['all'], title:'Review your essentials list in the Inventory tab', desc:'Go through the Inventory tab and check off what you already own. What\'s left unchecked is your shopping list — and tells you how much to set aside for furniture and basics.'},
+  {id:'dep-4', off:-4, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // -3
+  {id:'dep-3', off:-3, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // -2  → the hunt begins (this is when listings are actually real)
+  {id:'t19', off:-2, cat:'hunt', applies:['apartment','shared'], title:'Start the real apartment search', desc:'Most landlords list units only 30–60 days before they\'re available, so this is the first point where what you find is actually rentable for your date. Searching earlier mostly shows places that\'ll be gone.'},
+  {id:'t20', off:-2, cat:'hunt', applies:['apartment','shared'], title:'Tour at least 3 places; take notes & photos of each'},
+  {id:'t21', off:-2, cat:'hunt', applies:['apartment','shared'], title:'Compare your options in the Finding a Place tab'},
+  {id:'dep-2', off:-2, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // -1
+  {id:'t23', off:-1, cat:'hunt', applies:['apartment','shared'], title:'Submit application(s) — bring your document packet'},
+  {id:'t24', off:-1, cat:'hunt', applies:['apartment','shared'], title:'Read the lease carefully before signing', desc:'Check the rent amount, lease length, deposit terms, who pays which utilities, the pet and guest rules, and how to give notice when you leave. Ask about anything unclear before you sign — it\'s binding afterward.'},
+  {id:'t25', off:-1, cat:'life', applies:['all'], title:'Set up utilities (power, internet, water if applicable)'},
+  {id:'t26', off:-1, cat:'life', applies:['apartment','shared'], title:'Buy renter\'s insurance (usually $10-20/mo)'},
+  {id:'t27', off:-1, cat:'life', applies:['all'], title:'Book the move — truck, help, or boxes'},
+  {id:'dep-1', off:-1, cat:'money', applies:['all'], title:'Make this month\'s deposit into the move fund'},
+  // 0  → move week
+  {id:'t28', off:0, cat:'move', applies:['all'], title:'Photograph every room BEFORE moving anything in'},
+  {id:'t29', off:0, cat:'move', applies:['all'], title:'Complete the move-in inspection checklist'},
+  {id:'t30', off:0, cat:'move', applies:['all'], title:'Change your address (bank, school, license, mail)'},
+  {id:'t31', off:0, cat:'move', applies:['all'], title:'Move in 🎉'}
+];
+
+/* Two scenarios that provide year-round, permanent housing. Numbers are
+   the BOTTOM-THIRD of the current Bangor market (corner-cutting starter
+   place), not the advertised median. Solo studio/1-BR ~$950; a rented
+   room ~$775 (utilities often partly separate for cheap rooms). */
+const SEED_BUDGET = {
+  scenarios:['Shared (roommate)','Solo apartment'],
+  rows:[
+    {label:'Rent / room',     vals:[775, 950]},
+    {label:'Utilities',       vals:[80, 150]},
+    {label:'Internet',        vals:[25, 55]},
+    {label:'Groceries',       vals:[320, 350]},
+    {label:'Car (gas+ins+upkeep)', vals:[260, 260]},
+    {label:'Phone',           vals:[55, 55]},
+    {label:'Renter insurance',vals:[14, 16]},
+    {label:'Misc / buffer',   vals:[120, 120]}
+  ]
+};
+
+const SEED_GOALS = [
+  {label:'Security deposit',  amt:950},
+  {label:'First month rent',  amt:950},
+  {label:'Emergency cushion', amt:1500},
+  {label:'Furniture & basics',amt:800},
+  {label:'Moving costs',      amt:300}
+];
+
+const SEED_INVENTORY = {
+  'Bedroom':['Bed / mattress','Sheets & pillows','Lamp','Hangers'],
+  'Bathroom':['Towels','Shower curtain','Toiletries','Plunger'],
+  'Kitchen':['Pots & pan','Plates / bowls / cups','Utensils','Can opener','Trash can'],
+  'Cleaning':['Broom','All-purpose cleaner','Sponges','Dish soap','Toilet brush'],
+  'First night':['Phone charger','Toilet paper','Snacks','Basic tools (screwdriver)']
+};
+
+const SEED_DOCS = [
+  {label:"Driver's license / state ID", sub:'Primary photo ID'},
+  {label:'Social Security card', sub:'Or number memorized for applications'},
+  {label:'Recent pay stubs', sub:'Usually last 2-3 months'},
+  {label:'Bank statements', sub:'Proof of funds / steady balance'},
+  {label:'References list', sub:'Names + phone numbers, with permission'},
+  {label:'Credit score checked', sub:'Free via annualcreditreport.com or your bank'},
+  {label:'Co-signer lined up (if needed)', sub:'For thin or no credit history'},
+  {label:'Proof of income / job letter', sub:'Some landlords ask for this'}
+];
+
+const SEED_INSPECTION = [
+  {label:'Photograph all walls', sub:'Existing scuffs, holes, paint'},
+  {label:'Photograph floors & carpet', sub:'Stains, scratches, wear'},
+  {label:'Photograph appliances', sub:'Fridge, stove, dishwasher condition'},
+  {label:'Photograph windows & screens', sub:'Cracks, broken latches'},
+  {label:'Photograph bathroom', sub:'Caulking, tiles, fixtures, leaks'},
+  {label:'Test every outlet & light switch', sub:'Note any that fail'},
+  {label:'Run water — check pressure & drainage', sub:'Hot water timing too'},
+  {label:'Note photo timestamps / email them to yourself', sub:'Creates a dated record'},
+  {label:'Complete & sign the landlord move-in form', sub:'Keep your own copy'}
+];
+
+function freshState(){
+  return {
+    schema:SCHEMA,
+    moveDate:'2027-06-01',
+    housingFilter:'undecided',
+    wage:16, hours:30,
+    marginScenarioIdx:0,
+    tasks:{},              // id -> {done, completedDate, notes}
+    collapsed:{},          // monthKey -> bool
+    budget:JSON.parse(JSON.stringify(SEED_BUDGET)),
+    goals:JSON.parse(JSON.stringify(SEED_GOALS)),
+    txns:[],               // {date, amt}
+    inventory:JSON.parse(JSON.stringify(SEED_INVENTORY)),
+    invChecked:{},         // "cat::item" -> bool
+    invCustom:{},          // cat -> [items]
+    docs:{},               // index -> bool
+    inspection:{}          // index -> bool
+  };
+}
+
+let S = load();
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){const p=JSON.parse(raw); if(p&&p.schema===SCHEMA) return p;}
+  }catch(e){}
+  return freshState();
+}
+let saveTimer;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('Could not save — storage may be full');}},150);
+}
+
+/* =====================================================================
+   HELPERS
+   ===================================================================== */
+const $ = s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const money=n=>'$'+Math.round(n).toLocaleString();
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+function moveDateObj(){ return S.moveDate ? new Date(S.moveDate+'T00:00:00') : null; }
+function monthKeyForOffset(off){
+  const d=moveDateObj(); if(!d) return null;
+  const x=new Date(d.getFullYear(),d.getMonth()+off,1);
+  return {key:x.getFullYear()+'-'+x.getMonth(), y:x.getFullYear(), m:x.getMonth(), date:x};
+}
+function taskState(id){ return S.tasks[id] || (S.tasks[id]={done:false,completedDate:'',notes:''}); }
+/* A task's due date = end of the month that is |offset| months before move-in.
+   We use the LAST day of that month so a task isn't "late" until the month
+   it belongs to is actually over. */
+function taskDueDate(off){
+  const d=moveDateObj(); if(!d) return null;
+  // last day of (move month + off): day 0 of the following month
+  return new Date(d.getFullYear(), d.getMonth()+off+1, 0);
+}
+function daysBetween(a,b){ return Math.round((a-b)/86400000); }
+function currentMonthIndex(){ // months from now relative to move (0 = move month)
+  const d=moveDateObj(); if(!d) return null;
+  const now=new Date(); now.setDate(1); now.setHours(0,0,0,0);
+  return (d.getFullYear()-now.getFullYear())*12 + (d.getMonth()-now.getMonth());
+}
+
+/* which tasks are visible under current housing filter */
+function visibleTasks(){
+  const f=S.housingFilter;
+  return SEED_TASKS.filter(t=>{
+    if(t.applies.includes('all')) return true;
+    if(f==='undecided') return false; // undecided shows only universal money/docs/life
+    return t.applies.includes(f);
+  });
+}
+
+/* =====================================================================
+   TABS
+   ===================================================================== */
+const TABS=[
+  ['dashboard','Dashboard'],['upcoming','Now'],['timeline','Timeline'],
+  ['finding','Finding a Place'],['money','Money'],
+  ['inventory','Inventory'],['documents','Documents'],['inspection','Inspection'],['data','Save']
+];
+let activeTab='dashboard';
+function buildTabs(){
+  const bar=$('#tabbar'); bar.innerHTML='';
+  TABS.forEach(([id,label])=>{
+    const b=el('button',id===activeTab?'active':'',label);
+    b.onclick=()=>{activeTab=id;render();window.scrollTo({top:0,behavior:'smooth'});};
+    bar.appendChild(b);
+  });
+}
+function showPanel(){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.dataset.panel===activeTab));
+}
+
+/* =====================================================================
+   DASHBOARD
+   ===================================================================== */
+function renderDashboard(){
+  const d=moveDateObj();
+  const big=$('#daysBig'), line=$('#dateLine');
+  if(d){
+    const days=Math.ceil((d-new Date())/86400000);
+    if(days>0){big.classList.remove('none');big.textContent=days;line.textContent=days+' days until '+d.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'});}
+    else if(days===0){big.classList.add('none');big.textContent="Today's the day!";line.textContent=d.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'});}
+    else{big.classList.add('none');big.textContent='Moved in';line.textContent='Target was '+d.toLocaleDateString();}
+  }else{big.classList.add('none');big.textContent='—';line.textContent='Set your date to start the countdown';}
+  $('#moveDate').value=S.moveDate;
+
+  // rings
+  const rings=$('#rings'); rings.innerHTML='';
+  const vis=visibleTasks();
+  const tasksDone=vis.filter(t=>taskState(t.id).done).length;
+  const savedTotal=S.txns.reduce((a,t)=>a+(+t.amt||0),0);
+  const goalTotal=S.goals.reduce((a,g)=>a+(+g.amt||0),0);
+  let invTotal=0,invDone=0;
+  invEntries().forEach(([cat,items])=>items.forEach(it=>{invTotal++;if(S.invChecked[cat+'::'+it])invDone++;}));
+  const docsDone=SEED_DOCS.filter((_,i)=>S.docs[i]).length;
+  const ringData=[
+    {label:'Checklist',sub:tasksDone+' / '+vis.length,pct:vis.length?tasksDone/vis.length:0},
+    {label:'Savings',sub:money(savedTotal)+' / '+money(goalTotal),pct:goalTotal?Math.min(1,savedTotal/goalTotal):0},
+    {label:'Inventory',sub:invDone+' / '+invTotal,pct:invTotal?invDone/invTotal:0},
+    {label:'Documents',sub:docsDone+' / '+SEED_DOCS.length,pct:SEED_DOCS.length?docsDone/SEED_DOCS.length:0}
+  ];
+  ringData.forEach(r=>rings.appendChild(ringCard(r)));
+
+  // margin
+  renderMargin();
+}
+function ringCard(r){
+  const c=el('div','ring-card');
+  const pct=Math.round(r.pct*100), circ=2*Math.PI*36, off=circ*(1-r.pct);
+  c.innerHTML=`<div class="ring">
+    <svg width="84" height="84"><circle cx="42" cy="42" r="36" fill="none" stroke="var(--line)" stroke-width="7"/>
+    <circle cx="42" cy="42" r="36" fill="none" stroke="var(--teal)" stroke-width="7" stroke-linecap="round"
+      stroke-dasharray="${circ}" stroke-dashoffset="${off}"/></svg>
+    <div class="pct">${pct}%</div></div>
+    <div class="rl">${r.label}</div><div class="rsub">${r.sub}</div>`;
+  return c;
+}
+function scenarioTotal(idx){return S.budget.rows.reduce((a,r)=>a+(+r.vals[idx]||0),0);}
+function renderMargin(){
+  const sel=$('#marginScenario');
+  sel.innerHTML='';
+  S.budget.scenarios.forEach((name,i)=>{const o=el('option',null,name);o.value=i;sel.appendChild(o);});
+  if(S.marginScenarioIdx>=S.budget.scenarios.length)S.marginScenarioIdx=0;
+  sel.value=S.marginScenarioIdx;
+  $('#wage').value=S.wage; $('#hours').value=S.hours;
+  const income=(+S.wage||0)*(+S.hours||0)*52/12;
+  const expense=scenarioTotal(S.marginScenarioIdx);
+  const margin=income-expense;
+  $('#mIncome').textContent=money(income);
+  $('#mExpense').textContent=money(expense);
+  const mv=$('#mMargin'); mv.textContent=(margin>=0?'+':'−')+money(Math.abs(margin));
+  mv.className='v '+(margin>=0?'pos':'neg');
+  const note=$('#marginNote');
+  if(margin>=200) note.textContent='Comfortable margin — room for surprises and saving.';
+  else if(margin>=0) note.textContent='Tight but workable. Little buffer for emergencies — watch it closely.';
+  else note.textContent='This scenario costs more than you earn. Cut expenses, raise income, or pick a cheaper option.';
+}
+
+/* =====================================================================
+   TIMELINE
+   ===================================================================== */
+function renderHousingToggle(){
+  const wrap=$('#housingToggle'); wrap.innerHTML='';
+  HOUSING_TYPES.forEach(h=>{
+    const b=el('button',S.housingFilter===h.id?'on':'',h.label);
+    b.onclick=()=>{S.housingFilter=h.id;save();render();};
+    wrap.appendChild(b);
+  });
+}
+function renderTimeline(){
+  const wrap=$('#timeline'); wrap.innerHTML='';
+  if(!S.moveDate){wrap.appendChild(el('p','empty-hint','Set your move-in date on the Dashboard to generate the timeline.'));return;}
+  const vis=visibleTasks();
+  // group by offset month
+  const groups={};
+  vis.forEach(t=>{(groups[t.off]=groups[t.off]||[]).push(t);});
+  const offsets=Object.keys(groups).map(Number).sort((a,b)=>a-b);
+  const curIdx=currentMonthIndex();
+  offsets.forEach(off=>{
+    const mk=monthKeyForOffset(off);
+    const monthName=MONTHS[mk.m]+' '+mk.y;
+    const rel = off===0?'Move month':(off<0?(-off)+' month'+(off<-1?'s':'')+' before':'after');
+    const isCurrent = curIdx!==null && off===curIdx;
+    const collapsed=S.collapsed[mk.key]===true && !isCurrent;
+    const items=groups[off];
+    const done=items.filter(t=>taskState(t.id).done).length;
+
+    const block=el('div','month-block'+(collapsed?' collapsed':''));
+    const head=el('div','month-head');
+    head.innerHTML=`<span class="chev">▾</span><h3>${monthName}</h3><span class="when">${rel}</span><span class="mprog">${done}/${items.length}</span>`;
+    head.onclick=()=>{S.collapsed[mk.key]=!collapsed;save();renderTimeline();};
+    block.appendChild(head);
+
+    const list=el('div','task-list');
+    items.forEach(t=>list.appendChild(taskRow(t)));
+    block.appendChild(list);
+    wrap.appendChild(block);
+  });
+}
+function taskRow(t){
+  const st=taskState(t.id);
+  const row=el('div','task'+(st.done?' done':''));
+  const tagClass={money:'money',docs:'docs',hunt:'hunt',move:'move',life:'life'}[t.cat]||'life';
+  const tagText={money:'money',docs:'docs',hunt:'hunt',move:'move',life:'life'}[t.cat]||'';
+  row.innerHTML=`<span class="cb"><input type="checkbox" ${st.done?'checked':''}></span>
+    <div class="body">
+      <span class="title">${t.title}<span class="tag ${tagClass}">${tagText}</span></span>
+      ${t.desc?`<div class="task-desc">${t.desc}</div>`:''}
+      <div><button class="toggle-notes">＋ date &amp; notes</button></div>
+      <div class="meta">
+        <div class="mini"><label class="field">Completed</label><input type="date" class="cdate" value="${st.completedDate||''}"></div>
+        <div class="notes"><label class="field">Notes</label><textarea rows="1" placeholder="Optional…">${st.notes||''}</textarea></div>
+      </div>
+    </div>`;
+  const cb=row.querySelector('input[type=checkbox]');
+  cb.onchange=()=>{st.done=cb.checked; if(cb.checked&&!st.completedDate){st.completedDate=new Date().toISOString().slice(0,10);} save(); renderTimeline(); if(activeTab==='timeline'){} };
+  row.querySelector('.title').onclick=()=>{cb.checked=!cb.checked;cb.onchange();};
+  const toggle=row.querySelector('.toggle-notes');
+  toggle.onclick=()=>{row.classList.toggle('show-meta');};
+  if(st.completedDate||st.notes) row.classList.add('show-meta');
+  row.querySelector('.cdate').onchange=e=>{st.completedDate=e.target.value;save();};
+  const ta=row.querySelector('textarea');
+  ta.oninput=e=>{st.notes=e.target.value;save();};
+  return row;
+}
+
+/* =====================================================================
+   UPCOMING
+   ===================================================================== */
+function renderUpcoming(){
+  const wrap=$('#upcoming'); wrap.innerHTML='';
+  if(!S.moveDate){wrap.appendChild(el('p','empty-hint','Set your move-in date to see what\'s coming up.'));return;}
+  const today=new Date(); today.setHours(0,0,0,0);
+  const GRACE=15; // days past due before something is flagged overdue
+  const vis=visibleTasks();
+
+  // Build entries with real due dates + day deltas (skip completed)
+  const entries=[];
+  vis.forEach(t=>{
+    const st=taskState(t.id);
+    if(st.done) return;
+    const due=taskDueDate(t.off);
+    if(!due) return;
+    entries.push({t, st, due, days: daysBetween(due, today)}); // days<0 => past due
+  });
+
+  // After move-in entirely?
+  const md=moveDateObj();
+  if(md && today > taskDueDate(0)){
+    wrap.appendChild(el('p','empty-hint','Your move date has passed. Check the Inspection tab for any move-in day items.'));
+    return;
+  }
+
+  // Buckets
+  const overdue = entries.filter(e=> e.days < -GRACE).sort((a,b)=>a.due-b.due);
+  const dueNow  = entries.filter(e=> e.days >= -GRACE && e.days <= 45).sort((a,b)=>a.due-b.due);
+  const ahead   = entries.filter(e=> e.days > 45).sort((a,b)=>a.due-b.due);
+
+  const fmt = d => d.toLocaleDateString(undefined,{month:'short',year:'numeric'});
+  const rowFor = e => {
+    const it=el('div','upc-item');
+    const late = e.days < 0;
+    const when = late ? `${-e.days} days past` : (e.days<=45 ? 'due soon' : fmt(e.due));
+    it.innerHTML=`<span class="cb"><input type="checkbox"></span>
+      <div class="upc-body"><div class="upc-title">${e.t.title}</div>
+      <div class="upc-when ${late?'late':''}">${when}</div></div>`;
+    it.querySelector('input').onchange=()=>{e.st.done=true;e.st.completedDate=new Date().toISOString().slice(0,10);save();render();};
+    return it;
+  };
+  const group = (title, arr, cls, showBadge) => {
+    const g=el('div','upc-group '+(cls||''));
+    g.innerHTML=`<h3>${title}${showBadge&&arr.length?` <span class="badge">${arr.length}</span>`:''}</h3>`;
+    if(!arr.length) g.appendChild(el('p','upc-empty','Nothing here right now.'));
+    else arr.forEach(e=>g.appendChild(rowFor(e)));
+    return g;
+  };
+
+  if(overdue.length) wrap.appendChild(group('Overdue', overdue, 'overdue', true));
+  wrap.appendChild(group('Do these now', dueNow, 'duenow', true));
+
+  // Divider, then everything that's still ahead of schedule
+  if(ahead.length){
+    const div=el('div','upc-divider','<span>↓ further out — you\'re ahead on these</span>');
+    wrap.appendChild(div);
+    wrap.appendChild(group('Coming up', ahead, 'ahead', false));
+  }
+}
+
+/* =====================================================================
+   HOUSING COMPARISON
+   ===================================================================== */
+function ensureHousing(){
+  if(!S.housing){
+    S.housing={
+      fields:['Monthly cost','Commute','Parking','Internet','Notes'],
+      options:[
+        {name:'Room in shared place', vals:['$775','15 min','Street','Maybe incl.','']},
+        {name:'Studio apartment', vals:['$950','20 min','$40','$55','']},
+        {name:'1-bedroom apartment', vals:['$1,100','15 min','Included','$55','']}
+      ]
+    };
+  }
+}
+function renderHousing(){
+  ensureHousing();
+  const tbl=$('#housingTable'); tbl.innerHTML='';
+  const thead=el('thead');
+  let hr='<tr><th style="min-width:120px">Location</th>';
+  S.housing.fields.forEach(f=>hr+=`<th>${f}</th>`);
+  hr+='<th class="del-col"></th></tr>';
+  thead.innerHTML=hr; tbl.appendChild(thead);
+  const tb=el('tbody');
+  S.housing.options.forEach((opt,oi)=>{
+    const tr=el('tr');
+    const nameTd=el('td');
+    const ni=el('input'); ni.type='text'; ni.value=opt.name;
+    ni.oninput=e=>{opt.name=e.target.value;save();};
+    nameTd.appendChild(ni); tr.appendChild(nameTd);
+    S.housing.fields.forEach((f,fi)=>{
+      const td=el('td');
+      const inp=el('input'); inp.type='text'; inp.value=opt.vals[fi]||'';
+      inp.oninput=e=>{opt.vals[fi]=e.target.value;save();};
+      td.appendChild(inp); tr.appendChild(td);
+    });
+    const dtd=el('td','del-col');
+    const x=el('button','del-x','×'); x.title='Remove';
+    x.onclick=()=>{S.housing.options.splice(oi,1);save();renderHousing();};
+    dtd.appendChild(x); tr.appendChild(dtd);
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb);
+}
+
+/* =====================================================================
+   BUDGET
+   ===================================================================== */
+function renderBudget(){
+  const tbl=$('#budgetTable'); tbl.innerHTML='';
+  const thead=el('thead');
+  const hr=el('tr');
+  hr.appendChild(el('th',null,'Expense'));
+  S.budget.scenarios.forEach((name,i)=>{
+    const th=el('th'); th.contentEditable=true; th.textContent=name;
+    th.oninput=()=>{S.budget.scenarios[i]=th.textContent;save();};
+    th.onblur=()=>{renderMargin();};
+    hr.appendChild(th);
+  });
+  hr.appendChild(el('th','del-col',''));
+  thead.appendChild(hr); tbl.appendChild(thead);
+
+  const tb=el('tbody');
+  S.budget.rows.forEach((row,ri)=>{
+    const tr=el('tr');
+    const lt=el('td'); const li=el('input'); li.type='text'; li.value=row.label;
+    li.oninput=e=>{row.label=e.target.value;save();}; lt.appendChild(li); tr.appendChild(lt);
+    S.budget.scenarios.forEach((_,si)=>{
+      const td=el('td','num');
+      const inp=el('input','num'); inp.type='number'; inp.value=row.vals[si]??0; inp.min=0;
+      inp.oninput=e=>{row.vals[si]=+e.target.value||0;save();updateBudgetTotals();renderMargin();};
+      td.appendChild(inp); tr.appendChild(td);
+    });
+    const dtd=el('td','del-col'); const x=el('button','del-x','×');
+    x.onclick=()=>{S.budget.rows.splice(ri,1);save();renderBudget();renderMargin();};
+    dtd.appendChild(x); tr.appendChild(dtd);
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb);
+
+  const tf=el('tfoot'); const ftr=el('tr');
+  ftr.appendChild(el('th',null,'Monthly total'));
+  S.budget.scenarios.forEach((_,si)=>{const th=el('th','num');th.id='btot'+si;ftr.appendChild(th);});
+  ftr.appendChild(el('th','del-col',''));
+  tf.appendChild(ftr); tbl.appendChild(tf);
+  updateBudgetTotals();
+}
+function updateBudgetTotals(){
+  S.budget.scenarios.forEach((_,si)=>{const c=$('#btot'+si);if(c)c.textContent=money(scenarioTotal(si));});
+}
+
+/* =====================================================================
+   SAVINGS
+   ===================================================================== */
+function renderGoals(){
+  const tbl=$('#goalTable'); tbl.innerHTML='';
+  const thead=el('thead'); thead.innerHTML='<tr><th>Goal</th><th class="num">Amount</th><th class="del-col"></th></tr>';
+  tbl.appendChild(thead);
+  const tb=el('tbody');
+  S.goals.forEach((g,gi)=>{
+    const tr=el('tr');
+    const lt=el('td');const li=el('input');li.type='text';li.value=g.label;
+    li.oninput=e=>{g.label=e.target.value;save();};lt.appendChild(li);tr.appendChild(lt);
+    const at=el('td','num');const ai=el('input','num');ai.type='number';ai.value=g.amt;ai.min=0;
+    ai.oninput=e=>{g.amt=+e.target.value||0;save();updateGoalSummary();renderDashboardLite();};
+    at.appendChild(ai);tr.appendChild(at);
+    const dtd=el('td','del-col');const x=el('button','del-x','×');
+    x.onclick=()=>{S.goals.splice(gi,1);save();renderGoals();};
+    dtd.appendChild(x);tr.appendChild(dtd);
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb);
+  const tf=el('tfoot');tf.innerHTML=`<tr><th>Total goal</th><th class="num" id="goalTot"></th><th class="del-col"></th></tr>`;
+  tbl.appendChild(tf);
+  updateGoalSummary();
+}
+function savedTotal(){return S.txns.reduce((a,t)=>a+(+t.amt||0),0);}
+function goalTotalFn(){return S.goals.reduce((a,g)=>a+(+g.amt||0),0);}
+function updateGoalSummary(){
+  const gt=goalTotalFn(), st=savedTotal();
+  const c=$('#goalTot'); if(c)c.textContent=money(gt);
+  $('#savedVsGoal').textContent=money(st)+' / '+money(gt);
+  $('#goalBar').style.width=(gt?Math.min(100,st/gt*100):0)+'%';
+  renderProjection();
+}
+function renderProjection(){
+  const box=$('#projBox'); const gt=goalTotalFn(), st=savedTotal();
+  // require at least 2 distinct months of data for a projection
+  if(S.txns.length<2){box.className='proj guard';box.innerHTML='Log at least two months of saving and a projected finish date will appear here. (One or two deposits isn\'t enough to predict from.)';return;}
+  const dates=S.txns.map(t=>new Date(t.date+'T00:00:00')).filter(d=>!isNaN(d)).sort((a,b)=>a-b);
+  if(dates.length<2){box.className='proj guard';box.innerHTML='Add dates to your deposits to enable a projection.';return;}
+  const spanMonths=(dates[dates.length-1]-dates[0])/86400000/30.44;
+  if(spanMonths<1){box.className='proj guard';box.innerHTML='Keep logging — once you have about a month of history, a projected finish date will appear.';return;}
+  const rate=st/spanMonths; // $/month
+  const remaining=Math.max(0,gt-st);
+  if(st>=gt){box.className='proj';box.innerHTML='<div class="v">Goal reached 🎉</div><div style="font-size:.85rem;color:var(--ink-soft);margin-top:4px">You\'ve saved your full target. Keep the cushion growing if you can.</div>';return;}
+  if(rate<=0){box.className='proj guard';box.innerHTML='No net saving yet — projection paused.';return;}
+  const monthsLeft=remaining/rate;
+  const finish=new Date(); finish.setMonth(finish.getMonth()+Math.ceil(monthsLeft));
+  box.className='proj';
+  box.innerHTML=`<div style="font-size:.8rem;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em">Projected to hit goal</div>
+    <div class="v">${finish.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</div>
+    <div style="font-size:.85rem;color:var(--ink-soft);margin-top:4px">at about ${money(rate)}/month · based on ${spanMonths.toFixed(1)} months of history</div>`;
+  // compare to move date
+  const md=moveDateObj();
+  if(md){
+    const ok = finish <= md;
+    const warn=el('div'); warn.style.cssText='font-size:.85rem;margin-top:8px;font-weight:500;color:'+(ok?'var(--green)':'var(--rust)');
+    warn.textContent= ok ? '✓ On track to be funded before move-in.' : '⚠ At this pace you\'ll fall short by move-in. Increase the rate or trim the goal.';
+    box.appendChild(warn);
+  }
+}
+function renderTxns(){
+  const wrap=$('#txnList'); wrap.innerHTML='';
+  $('#txnDate').value=$('#txnDate').value||new Date().toISOString().slice(0,10);
+  if(!S.txns.length){wrap.appendChild(el('p','empty-hint','No deposits logged yet.'));return;}
+  const sorted=[...S.txns].map((t,i)=>({...t,_i:i})).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  sorted.forEach(t=>{
+    const r=el('div','checkrow');
+    r.innerHTML=`<div class="body"><span class="lbl">${money(+t.amt||0)}</span><span class="sub">${t.date||'no date'}</span></div>`;
+    const x=el('button','del-x','×');
+    x.onclick=()=>{S.txns.splice(t._i,1);save();renderTxns();updateGoalSummary();renderDashboardLite();};
+    r.appendChild(x); wrap.appendChild(r);
+  });
+}
+
+/* =====================================================================
+   INVENTORY
+   ===================================================================== */
+function invEntries(){
+  // merge seed + custom categories
+  const out=[];
+  const cats=new Set([...Object.keys(S.inventory),...Object.keys(S.invCustom||{})]);
+  cats.forEach(cat=>{
+    const base=S.inventory[cat]||[];
+    const extra=(S.invCustom&&S.invCustom[cat])||[];
+    out.push([cat,[...base,...extra]]);
+  });
+  return out;
+}
+function renderInventory(){
+  const wrap=$('#inventory'); wrap.innerHTML='';
+  invEntries().forEach(([cat,items])=>{
+    wrap.appendChild(el('div','cat-head',cat));
+    items.forEach(item=>{
+      const k=cat+'::'+item;
+      const r=el('div','checkrow'+(S.invChecked[k]?' done':''));
+      r.innerHTML=`<span class="cb"><input type="checkbox" ${S.invChecked[k]?'checked':''}></span><div class="body"><span class="lbl">${item}</span></div>`;
+      r.querySelector('input').onchange=e=>{S.invChecked[k]=e.target.checked;save();r.classList.toggle('done',e.target.checked);renderDashboardLite();};
+      wrap.appendChild(r);
+    });
+    // add-item inline
+    const add=el('div','add-inline');
+    add.innerHTML=`<input type="text" placeholder="Add item to ${cat}…">`;
+    const btn=el('button','btn sm','+');
+    const inp=add.querySelector('input');
+    const doAdd=()=>{const v=inp.value.trim();if(!v)return;S.invCustom=S.invCustom||{};(S.invCustom[cat]=S.invCustom[cat]||[]).push(v);inp.value='';save();renderInventory();};
+    btn.onclick=doAdd; inp.onkeydown=e=>{if(e.key==='Enter')doAdd();};
+    add.appendChild(btn); wrap.appendChild(add);
+  });
+}
+
+/* =====================================================================
+   DOCS + INSPECTION (simple checklists)
+   ===================================================================== */
+function renderChecklist(target,items,store){
+  const wrap=$(target); wrap.innerHTML='';
+  items.forEach((it,i)=>{
+    const r=el('div','checkrow'+(store[i]?' done':''));
+    r.innerHTML=`<span class="cb"><input type="checkbox" ${store[i]?'checked':''}></span>
+      <div class="body"><span class="lbl">${it.label}</span>${it.sub?`<div class="sub">${it.sub}</div>`:''}</div>`;
+    r.querySelector('input').onchange=e=>{store[i]=e.target.checked;save();r.classList.toggle('done',e.target.checked);renderDashboardLite();};
+    wrap.appendChild(r);
+  });
+}
+
+/* =====================================================================
+   DATA: export / import / summary / reset
+   ===================================================================== */
+function download(filename,text,type){
+  const blob=new Blob([text],{type:type||'application/octet-stream'});
+  const url=URL.createObjectURL(blob);
+  const a=el('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},100);
+}
+function exportJSON(){download('moveout-plan.json',JSON.stringify(S,null,2),'application/json');toast('Backup downloaded');}
+function exportSummary(){
+  const d=moveDateObj();
+  const vis=visibleTasks();
+  const tDone=vis.filter(t=>taskState(t.id).done).length;
+  const st=savedTotal(),gt=goalTotalFn();
+  const curIdx=currentMonthIndex();
+  const overdue=vis.filter(t=>!taskState(t.id).done && curIdx!==null && t.off<curIdx);
+  const docsDone=SEED_DOCS.filter((_,i)=>S.docs[i]).length;
+  const days=d?Math.ceil((d-new Date())/86400000):null;
+  const rows=overdue.slice(0,12).map(t=>`<li>${t.title}</li>`).join('')||'<li><em>None — all caught up.</em></li>';
+  const html=`<!doctype html><meta charset=utf-8><title>Move-Out Progress</title>
+<style>body{font-family:system-ui,sans-serif;max-width:640px;margin:40px auto;padding:0 20px;color:#23302e;line-height:1.5}
+h1{font-size:1.6rem}.stat{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e3dccd}
+.stat b{font-size:1.1rem}.bar{height:10px;background:#e3dccd;border-radius:9px;overflow:hidden;margin:4px 0 16px}
+.bar>span{display:block;height:100%;background:#15605a}h2{font-size:1.1rem;margin-top:28px}small{color:#8a958f}</style>
+<h1>Move-Out progress</h1>
+<small>Snapshot generated ${new Date().toLocaleString()}</small>
+<div class="stat"><span>Target move-in</span><b>${d?d.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}):'not set'}</b></div>
+${days!=null?`<div class="stat"><span>Days remaining</span><b>${days>0?days:'—'}</b></div>`:''}
+<div class="stat"><span>Checklist done</span><b>${tDone} / ${vis.length}</b></div>
+<div class="bar"><span style="width:${vis.length?tDone/vis.length*100:0}%"></span></div>
+<div class="stat"><span>Saved toward goal</span><b>${money(st)} / ${money(gt)}</b></div>
+<div class="bar"><span style="width:${gt?Math.min(100,st/gt*100):0}%"></span></div>
+<div class="stat"><span>Documents ready</span><b>${docsDone} / ${SEED_DOCS.length}</b></div>
+<h2>Overdue / needs attention</h2><ul>${rows}</ul>`;
+  download('moveout-progress.html',html,'text/html');
+  toast('Summary downloaded — open it in any browser');
+}
+function importJSON(file){
+  const fr=new FileReader();
+  fr.onload=()=>{
+    try{
+      const p=JSON.parse(fr.result);
+      if(!p||typeof p!=='object')throw 0;
+      if(p.schema!==SCHEMA){ if(!confirm('This backup is from a different version. Import anyway?')) return; }
+      S=Object.assign(freshState(),p);
+      save(); buildTabs(); render(); toast('Backup imported');
+    }catch(e){toast('That file could not be read as a valid backup');}
+  };
+  fr.readAsText(file);
+}
+
+/* =====================================================================
+   RENDER ORCHESTRATION
+   ===================================================================== */
+function renderDashboardLite(){ if(activeTab==='dashboard')renderDashboard(); }
+function render(){
+  buildTabs(); showPanel();
+  switch(activeTab){
+    case 'dashboard': renderDashboard(); break;
+    case 'upcoming': renderUpcoming(); break;
+    case 'timeline': renderHousingToggle(); renderTimeline(); break;
+    case 'finding': renderHousing(); break;
+    case 'money': renderBudget(); renderMargin(); renderGoals(); renderTxns(); break;
+    case 'inventory': renderInventory(); break;
+    case 'documents': renderChecklist('#documents',SEED_DOCS,S.docs); break;
+    case 'inspection': renderChecklist('#inspection',SEED_INSPECTION,S.inspection); break;
+    case 'data': break;
+  }
+}
+
+/* =====================================================================
+   WIRING
+   ===================================================================== */
+$('#moveDate').onchange=e=>{S.moveDate=e.target.value;save();render();};
+$('#wage').oninput=e=>{S.wage=+e.target.value||0;save();renderMargin();};
+$('#hours').oninput=e=>{S.hours=+e.target.value||0;save();renderMargin();};
+$('#marginScenario').onchange=e=>{S.marginScenarioIdx=+e.target.value;save();renderMargin();};
+
+$('#addHousing').onclick=()=>{ensureHousing();S.housing.options.push({name:'New location',vals:S.housing.fields.map(()=>'')});save();renderHousing();};
+$('#addBudgetRow').onclick=()=>{S.budget.rows.push({label:'New expense',vals:S.budget.scenarios.map(()=>0)});save();renderBudget();renderMargin();};
+$('#addScenario').onclick=()=>{S.budget.scenarios.push('Scenario '+(S.budget.scenarios.length+1));S.budget.rows.forEach(r=>r.vals.push(0));save();renderBudget();renderMargin();};
+$('#addGoal').onclick=()=>{S.goals.push({label:'New goal',amt:0});save();renderGoals();};
+$('#addTxn').onclick=()=>{
+  const amt=+$('#txnAmt').value, date=$('#txnDate').value;
+  if(!amt){toast('Enter an amount');return;}
+  S.txns.push({date:date||new Date().toISOString().slice(0,10),amt});
+  $('#txnAmt').value=''; save(); renderTxns(); updateGoalSummary(); renderDashboardLite();
+};
+$('#addCat').onclick=()=>{
+  const v=$('#newCat').value.trim(); if(!v)return;
+  S.invCustom=S.invCustom||{}; if(!S.invCustom[v]&&!S.inventory[v])S.invCustom[v]=[];
+  $('#newCat').value=''; save(); renderInventory();
+};
+
+$('#exportBtn').onclick=exportJSON;
+$('#summaryBtn').onclick=exportSummary;
+$('#importBtn').onclick=()=>$('#importFile').click();
+$('#importFile').onchange=e=>{if(e.target.files[0])importJSON(e.target.files[0]);e.target.value='';};
+
+$('#resetBtn').onclick=()=>$('#resetModal').classList.add('open');
+$('#resetCancel').onclick=()=>$('#resetModal').classList.remove('open');
+$('#resetBackup').onclick=()=>{exportJSON();};
+$('#resetAnyway').onclick=()=>{
+  S=freshState(); save(); $('#resetModal').classList.remove('open'); activeTab='dashboard'; buildTabs(); render(); toast('Everything reset');
+};
+$('#resetModal').onclick=e=>{if(e.target.id==='resetModal')$('#resetModal').classList.remove('open');};
+
+$('#findingJump').onclick=e=>{e.preventDefault();activeTab='finding';render();window.scrollTo({top:0,behavior:'smooth'});};
+
+/* boot */
+buildTabs();
+render();
+</script>
+</body>
+</html>
