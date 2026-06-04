@@ -198,6 +198,8 @@ textarea{resize:vertical;min-height:38px;line-height:1.4}
 .upc-divider{display:flex;align-items:center;text-align:center;margin:6px 0 16px;color:var(--ink-faint)}
 .upc-divider span{font-size:.78rem;font-style:italic;font-family:'Newsreader',serif;padding:0 12px}
 .upc-divider::before,.upc-divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.dashnow-clear{color:var(--green);font-family:'Newsreader',serif;font-style:italic;font-size:1.05rem;margin:0 0 14px}
+.dashnow-callout{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
 
 /* ---- tables ---- */
 .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px}
@@ -303,7 +305,12 @@ footer.foot{max-width:var(--maxw);margin:30px auto 0;padding:18px;color:var(--in
     <div class="rings" id="rings"></div>
 
     <div class="card">
-      <h2><span class="n">01</span> Can I actually afford this?</h2>
+      <h2><span class="n">01</span> What needs doing now</h2>
+      <div id="dashNow" style="margin-top:14px"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="n">02</span> Can I actually afford this?</h2>
       <p class="lead">Your income against the budget scenario you're leaning toward. This is the number that matters most.</p>
       <div style="display:flex;gap:14px;flex-wrap:wrap;margin:16px 0">
         <div style="flex:1 1 120px"><label class="field">Hourly wage ($)</label><input type="number" id="wage" min="0" step="0.25"></div>
@@ -319,15 +326,6 @@ footer.foot{max-width:var(--maxw);margin:30px auto 0;padding:18px;color:var(--in
     </div>
   </section>
 
-  <!-- UPCOMING -->
-  <section class="panel" data-panel="upcoming">
-    <div class="card">
-      <h2><span class="n">02</span> What needs doing now</h2>
-      <p class="lead">Overdue items, this month, and next month — pulled automatically from your timeline.</p>
-      <div id="upcoming" style="margin-top:16px"></div>
-    </div>
-  </section>
-
   <!-- TIMELINE -->
   <section class="panel" data-panel="timeline">
     <div class="card">
@@ -338,48 +336,19 @@ footer.foot{max-width:var(--maxw);margin:30px auto 0;padding:18px;color:var(--in
     </div>
   </section>
 
-  <!-- FINDING A PLACE (+ housing comparison) -->
+  <!-- FINDING A PLACE (metro-driven) -->
   <section class="panel" data-panel="finding">
     <div class="card">
       <h2><span class="n">04</span> Finding a place</h2>
-      <p class="section-intro">A quick lay of the land for the Bangor, Maine area, so you know what's realistic before you start scrolling listings. These are <em>starter-place</em> numbers — the bottom third of the market, where a first apartment actually lives — not the glossy averages.</p>
-
-      <div class="ftable">
-        <div class="frow fhead"><div>Type</div><div>Realistic monthly range</div><div>Plan around</div></div>
-        <div class="frow"><div><strong>Room in a shared place</strong><span class="fsub">A bedroom in someone's house/apartment, shared kitchen &amp; bath</span></div><div>$700 – $1,050</div><div>$775 <span class="fsub">+ utilities if not bundled</span></div></div>
-        <div class="frow"><div><strong>Studio apartment</strong><span class="fsub">One room + kitchenette + bath, all yours</span></div><div>$800 – $1,069</div><div>$950</div></div>
-        <div class="frow"><div><strong>1-bedroom apartment</strong><span class="fsub">Separate bedroom; the common "real first apartment"</span></div><div>$1,100 – $1,390</div><div>$1,150</div></div>
-        <div class="frow"><div><strong>Half of a 2-bedroom (with a roommate)</strong><span class="fsub">Splitting a $1,525–1,700 unit two ways</span></div><div>$760 – $850 each</div><div>$800 <span class="fsub">+ split utilities</span></div></div>
-      </div>
-
-      <p class="margin-note" style="margin-top:14px">The published <em>average</em> 1-bedroom rent is around $1,237 — but that's skewed by newer, advertised units. Older buildings and spots a little outside the center run noticeably cheaper, and roughly two dozen units under $1,000 are typically available at any given time. <strong>Winter is the cheapest, least competitive time to look.</strong> A car is the biggest swing in the budget — if you can walk, bike, or use the Community Connector bus, dropping it frees up a lot.</p>
-
-      <h3 class="finding-h3">Where to look</h3>
-      <div class="link-grid">
-        <a class="linkcard" href="https://www.apartments.com/bangor-me/under-1000/" target="_blank" rel="noopener"><strong>Apartments.com</strong><span>Largest inventory; filter by price &amp; bedrooms. Has an under-$1,000 view.</span></a>
-        <a class="linkcard" href="https://www.zillow.com/bangor-me/apartments/" target="_blank" rel="noopener"><strong>Zillow</strong><span>Good map view; price-cap filters down to under $700.</span></a>
-        <a class="linkcard" href="https://www.rentable.co/bangor-me" target="_blank" rel="noopener"><strong>Rentable</strong><span>Daily-updated listings with the cheapest-tier filters.</span></a>
-        <a class="linkcard" href="https://www.spareroom.com/rooms-for-rent/me/penobscot_county" target="_blank" rel="noopener"><strong>SpareRoom</strong><span>Rooms &amp; roommate matching in Penobscot County.</span></a>
-        <a class="linkcard" href="https://www.roomies.com/rooms/bangor-me" target="_blank" rel="noopener"><strong>Roomies</strong><span>Room rentals; many list whether utilities are included.</span></a>
-        <a class="linkcard" href="https://maine.craigslist.org/search/roo#search=1~gallery~0~0" target="_blank" rel="noopener"><strong>Craigslist (Maine)</strong><span>Rooms &amp; shares — often the cheapest, but verify in person.</span></a>
-        <a class="linkcard" href="https://classifieds.bangordailynews.com/me-bangor/rentals/" target="_blank" rel="noopener"><strong>Bangor Daily News classifieds</strong><span>Local landlords who don't always post to big sites.</span></a>
-      </div>
-
-      <h3 class="finding-h3">Local landlords &amp; property managers</h3>
-      <p class="margin-note" style="margin-top:0">Smaller management companies sometimes have units that never hit the big listing sites — worth a direct call.</p>
-      <div class="link-grid">
-        <a class="linkcard" href="tel:+12079746606"><strong>Rent Bangor (Marsh Property Mgmt)</strong><span>Hermon · (207) 974-6606</span></a>
-        <a class="linkcard" href="tel:+12079428003"><strong>Maine Real Estate Management</strong><span>Downtown Bangor · (207) 942-8003</span></a>
-        <a class="linkcard" href="tel:+12072620199"><strong>Bangor Home Rentals</strong><span>(207) 262-0199</span></a>
-        <a class="linkcard" href="tel:+12079476979"><strong>Trott Properties</strong><span>(207) 947-6979</span></a>
-      </div>
-
-      <div class="data-note" style="margin-top:18px">Ranges reflect the Bangor-area market as of mid-2026 and will drift over time. Treat them as a starting sense of scale, not a quote — always confirm current prices on the listing itself.</div>
+      <p class="section-intro">Pick the Maine metro area you're focusing on. The cost ranges, listing links, and your comparison list below all update to match — and choosing an area also updates the matching rent, utility, insurance, and transit lines in your Budget.</p>
+      <label class="field" for="metroSelect">Metro area</label>
+      <select id="metroSelect" style="max-width:280px"></select>
+      <div id="metroBody" style="margin-top:18px"></div>
     </div>
 
     <div class="card">
       <h2>Compare your real locations</h2>
-      <p class="section-intro">As you find actual places, line them up side by side here. Rename each to a real listing and fill in what you learn on tours.</p>
+      <p class="section-intro" id="compareIntro">As you find actual places, line them up side by side here. Each metro keeps its own separate list, so you can plan more than one area at once.</p>
       <div class="tbl-scroll"><table id="housingTable"></table></div>
       <div class="btn-row" style="margin-top:14px">
         <button class="btn sm" id="addHousing">+ Add location</button>
@@ -472,7 +441,7 @@ footer.foot{max-width:var(--maxw);margin:30px auto 0;padding:18px;color:var(--in
   </section>
 
   <footer class="foot">
-    <a href="#" id="findingJump" style="font-weight:500">→ Apartment-finding overview &amp; listing sites</a>
+    <a href="#" id="findingJump" style="font-weight:500">→ Rent overviews &amp; listing sites (choose a metro)</a>
     <div style="margin-top:8px">Move-Out Planner · runs entirely in your browser · nothing is uploaded anywhere</div>
   </footer>
 </main>
@@ -490,14 +459,25 @@ footer.foot{max-width:var(--maxw);margin:30px auto 0;padding:18px;color:var(--in
   </div>
 </div>
 
+<div class="modal-back" id="metroModal">
+  <div class="modal">
+    <h3>Update budget for this area?</h3>
+    <p id="metroModalText"></p>
+    <div class="btn-row">
+      <button class="btn primary" id="metroUpdate">Update them</button>
+      <button class="btn" id="metroKeep">Keep my edits</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 /* =====================================================================
    STATE + SEED DATA
    ===================================================================== */
-const SCHEMA = 5;
-const KEY = 'moveoutPlanner.v5';
+const SCHEMA = 7;
+const KEY = 'moveoutPlanner.v7';
 
 const HOUSING_TYPES = [
   {id:'undecided', label:'Undecided'},
@@ -569,23 +549,161 @@ const SEED_TASKS = [
   {id:'t31', off:0, cat:'move', applies:['all'], title:'Move in 🎉'}
 ];
 
-/* Two scenarios that provide year-round, permanent housing. Numbers are
-   the BOTTOM-THIRD of the current Bangor market (corner-cutting starter
-   place), not the advertised median. Solo studio/1-BR ~$950; a rented
-   room ~$775 (utilities often partly separate for cheap rooms). */
+/* Budget rows. Rows the metro selector drives carry a stable `key`
+   (rent, utilities, renterIns, bus, autoIns) so the update logic can find
+   them even if the label is edited. Two scenarios: shared room vs. solo.
+   Seeded from the DEFAULT metro (Bangor) — METROS[].budget supplies the
+   per-area values that replace these when the metro changes. */
 const SEED_BUDGET = {
   scenarios:['Shared (roommate)','Solo apartment'],
   rows:[
-    {label:'Rent / room',     vals:[775, 950]},
-    {label:'Utilities',       vals:[80, 150]},
-    {label:'Internet',        vals:[25, 55]},
-    {label:'Groceries',       vals:[320, 350]},
-    {label:'Car (gas+ins+upkeep)', vals:[260, 260]},
-    {label:'Phone',           vals:[55, 55]},
-    {label:'Renter insurance',vals:[14, 16]},
-    {label:'Misc / buffer',   vals:[120, 120]}
+    {label:'Rent / room',        key:'rent',      vals:[775, 950]},
+    {label:'Utilities',          key:'utilities', vals:[80, 150]},
+    {label:'Internet',           vals:[25, 55]},
+    {label:'Groceries',          vals:[320, 350]},
+    {label:'Car: gas & upkeep',  vals:[170, 170]},
+    {label:'Auto insurance',     key:'autoIns',   vals:[90, 90]},
+    {label:'Bus / transit pass', key:'bus',       vals:[0, 0]},
+    {label:'Phone',              vals:[55, 55]},
+    {label:'Renter insurance',   key:'renterIns', vals:[14, 16]},
+    {label:'Misc / buffer',      vals:[120, 120]}
   ]
 };
+
+/* ---- Metro areas: the single source driving the Finding panel + budget ----
+   budget values are [shared, solo] to match the two budget scenarios.
+   Bangor is the default (index 0). */
+const METROS = [
+  {
+    id:'bangor', label:'Bangor',
+    budget:{ rent:[775,950], utilities:[80,150], renterIns:[14,16], bus:[0,0], autoIns:[90,90] },
+    intro:'A quick lay of the land for the Bangor, Maine area. These are <em>starter-place</em> numbers — the bottom third of the market, where a first apartment actually lives — not the glossy averages.',
+    ranges:[
+      ['Room in a shared place','A bedroom in someone\'s house/apartment, shared kitchen &amp; bath','$700 – $1,050','$775 <span class="fsub">+ utilities if not bundled</span>'],
+      ['Studio apartment','One room + kitchenette + bath, all yours','$800 – $1,069','$950'],
+      ['1-bedroom apartment','Separate bedroom; the common "real first apartment"','$1,100 – $1,390','$1,150'],
+      ['Half of a 2-bedroom (roommate)','Splitting a $1,525–1,700 unit two ways','$760 – $850 each','$800 <span class="fsub">+ split utilities</span>']
+    ],
+    note:'The published <em>average</em> 1-bedroom rent is around $1,237 — skewed by newer, advertised units. Older buildings and spots outside the center run cheaper, and roughly two dozen units under $1,000 are usually available. <strong>Winter is the cheapest, least competitive time to look.</strong> The Community Connector bus is free to ride, so going car-light is realistic here.',
+    sites:[
+      ['Apartments.com','https://www.apartments.com/bangor-me/under-1000/','Largest inventory; under-$1,000 view.'],
+      ['Zillow','https://www.zillow.com/bangor-me/apartments/','Good map view; price-cap filters.'],
+      ['Rentable','https://www.rentable.co/bangor-me','Daily-updated cheapest-tier listings.'],
+      ['SpareRoom','https://www.spareroom.com/rooms-for-rent/me/penobscot_county','Rooms &amp; roommate matching.'],
+      ['Roomies','https://www.roomies.com/rooms/bangor-me','Room rentals; utilities often noted.'],
+      ['Craigslist (Maine)','https://maine.craigslist.org/search/roo#search=1~gallery~0~0','Rooms &amp; shares — verify in person.'],
+      ['Bangor Daily News','https://classifieds.bangordailynews.com/me-bangor/rentals/','Local landlords off the big sites.']
+    ],
+    landlords:[
+      ['Rent Bangor (Marsh Property Mgmt)','tel:+12079746606','Hermon · (207) 974-6606'],
+      ['Maine Real Estate Management','tel:+12079428003','Downtown Bangor · (207) 942-8003'],
+      ['Bangor Home Rentals','tel:+12072620199','(207) 262-0199'],
+      ['Trott Properties','tel:+12079476979','(207) 947-6979']
+    ],
+    housingDefaults:[
+      {name:'Room in shared place', vals:['$775','15 min','Street','Maybe incl.','']},
+      {name:'Studio apartment', vals:['$950','20 min','$40','$55','']},
+      {name:'1-bedroom apartment', vals:['$1,100','15 min','Included','$55','']}
+    ]
+  },
+  {
+    id:'augusta', label:'Augusta',
+    budget:{ rent:[750,950], utilities:[85,150], renterIns:[14,16], bus:[0,0], autoIns:[85,85] },
+    intro:'A quick lay of the land for the Augusta, Maine area — the state capital. Costs run similar to or a touch below Bangor, with a small but real supply of budget units. These are <em>starter-place</em> (bottom-third) numbers.',
+    ranges:[
+      ['Room in a shared place','A bedroom in someone\'s house/apartment, shared kitchen &amp; bath','$650 – $950','$750 <span class="fsub">+ utilities if not bundled</span>'],
+      ['Studio apartment','One room + kitchenette + bath, all yours','$700 – $1,000','$900'],
+      ['1-bedroom apartment','Separate bedroom; the common "real first apartment"','$950 – $1,300','$1,050'],
+      ['Half of a 2-bedroom (roommate)','Splitting a ~$1,500 unit two ways','$700 – $800 each','$750 <span class="fsub">+ split utilities</span>']
+    ],
+    note:'Aggregators disagree a lot here — some quote 1-bedroom averages near $960, others near $1,560. The truth is a wide spread: budget units genuinely exist in the $700–1,000 range, especially a little outside the center. Augusta is small and walkable downtown, but transit is limited (KVCAP runs some routes), so a car is more likely needed than in Bangor or Portland.',
+    sites:[
+      ['Apartments.com','https://www.apartments.com/augusta-me/under-1000/','Largest inventory; under-$1,000 view.'],
+      ['Zillow','https://www.zillow.com/augusta-me/apartments/','Map view; price-cap filters.'],
+      ['Rentable','https://www.rentable.co/augusta-me','Daily-updated cheapest-tier listings.'],
+      ['Apartment Finder','https://www.apartmentfinder.com/Maine/Augusta-Apartments','Bargain-focused listings.'],
+      ['Roomies','https://www.roomies.com/rooms/augusta-me','Room rentals &amp; roommate matching.'],
+      ['Craigslist (Maine)','https://maine.craigslist.org/search/roo#search=1~gallery~0~0','Rooms &amp; shares — verify in person.'],
+      ['Kennebec Journal classifieds','https://www.centralmaine.com/classifieds/','Local listings for the capital region.']
+    ],
+    landlords:[
+      ['JR Maxwell / Augusta rentals','tel:+12076211000','Augusta · verify number'],
+      ['Sandy River Property Mgmt','tel:+12076262000','Central Maine · verify number'],
+      ['Mid-Maine Realty','tel:+12076230400','Augusta · verify number'],
+      ['Capital Area rentals (Craigslist)','https://maine.craigslist.org/search/apa','Direct from owners']
+    ],
+    housingDefaults:[
+      {name:'Room in shared place', vals:['$750','15 min','Driveway','Maybe incl.','']},
+      {name:'Studio apartment', vals:['$900','15 min','Lot','$50','']},
+      {name:'1-bedroom apartment', vals:['$1,050','15 min','Included','$55','']}
+    ]
+  },
+  {
+    id:'lewiston', label:'Lewiston/Auburn',
+    budget:{ rent:[750,1000], utilities:[85,150], renterIns:[14,16], bus:[0,0], autoIns:[95,95] },
+    intro:'A quick lay of the land for the Lewiston–Auburn "Twin Cities" area. It\'s one of Maine\'s more affordable metros, with lots of older mill-era housing stock. These are <em>starter-place</em> (bottom-third) numbers.',
+    ranges:[
+      ['Room in a shared place','A bedroom in someone\'s house/apartment, shared kitchen &amp; bath','$600 – $900','$750 <span class="fsub">+ utilities if not bundled</span>'],
+      ['Studio apartment','One room + kitchenette + bath, all yours','$700 – $950','$900'],
+      ['1-bedroom apartment','Separate bedroom; the common "real first apartment"','$900 – $1,300','$1,100'],
+      ['Half of a 2-bedroom (roommate)','Splitting a ~$1,450 unit two ways','$700 – $750 each','$725 <span class="fsub">+ split utilities</span>']
+    ],
+    note:'Estimates here swing wildly — from $739 to over $2,000 for a 1-bedroom depending on the source — because the stock ranges from cheap older units to renovated mill lofts. Live medians land around $950 (studio) and $1,150 (1-BR). Plenty of budget units exist in the older downtown housing. The cities are compact and the citylink bus runs free, so car-light is feasible.',
+    sites:[
+      ['Apartments.com','https://www.apartments.com/lewiston-me/under-1000/','Largest inventory; under-$1,000 view.'],
+      ['Zillow','https://www.zillow.com/lewiston-me/apartments/','Map view; price-cap filters.'],
+      ['PadMapper','https://www.padmapper.com/apartments/lewiston-me','Live median pricing by bedroom.'],
+      ['Apartment Finder','https://www.apartmentfinder.com/Maine/Lewiston-Apartments','Bargain-focused listings.'],
+      ['Roomies','https://www.roomies.com/rooms/lewiston-me','Room rentals &amp; roommate matching.'],
+      ['Craigslist (Maine)','https://maine.craigslist.org/search/roo#search=1~gallery~0~0','Rooms &amp; shares — verify in person.'],
+      ['Sun Journal classifieds','https://www.sunjournal.com/classifieds/','Local L/A listings.']
+    ],
+    landlords:[
+      ['Platz Associates','tel:+12077832500','Lewiston · verify number'],
+      ['Pleau Real Estate','tel:+12077840000','Lewiston · verify number'],
+      ['Auburn rentals (Craigslist)','https://maine.craigslist.org/search/apa','Direct from owners'],
+      ['Androscoggin property mgrs','https://maine.craigslist.org/search/apa','Search local listings']
+    ],
+    housingDefaults:[
+      {name:'Room in shared place', vals:['$725','10 min','Street','Maybe incl.','']},
+      {name:'Studio apartment', vals:['$900','10 min','Lot','$50','']},
+      {name:'1-bedroom apartment', vals:['$1,100','10 min','Street','$55','']}
+    ]
+  },
+  {
+    id:'portland', label:'Portland',
+    budget:{ rent:[1050,1400], utilities:[60,130], renterIns:[16,20], bus:[30,30], autoIns:[110,110] },
+    intro:'The Portland, Maine area — by far the most expensive, most competitive market of the four. These are still <em>starter-place</em> (bottom-third) numbers, but the whole scale is shifted up. A shared room is the realistic entry point here.',
+    ranges:[
+      ['Room in a shared place','A bedroom in someone\'s apartment/house, shared kitchen &amp; bath','$700 – $1,020','$850 <span class="fsub">many include utilities</span>'],
+      ['Studio apartment','One room + kitchenette + bath, all yours','$1,200 – $1,700','$1,400'],
+      ['1-bedroom apartment','Separate bedroom; pricey for a first solo place','$1,500 – $2,000','$1,650'],
+      ['Half of a 2-bedroom (roommate)','Splitting a $2,000–2,250 unit two ways','$1,000 – $1,125 each','$1,050 <span class="fsub">+ split utilities</span>']
+    ],
+    note:'Portland\'s <em>median</em> rent across all unit types is around $2,100 — well above the rest of Maine. Even cheap studios rarely dip below $1,200, so a solo apartment is a stretch on a starter income. The practical move is a <strong>room or a shared 2-bedroom</strong>, where listings genuinely run $700–1,050 and often fold in heat. Looking just off the peninsula (South Portland, Westbrook) and searching in <strong>winter</strong> both cut the price. Parking is costly, but the Metro bus and walkable downtown make going car-free more viable than elsewhere.',
+    sites:[
+      ['Apartments.com','https://www.apartments.com/portland-me/under-1500/','Largest inventory; under-$1,500 view.'],
+      ['Zillow','https://www.zillow.com/portland-me/apartments/','Map view; filter hard on price.'],
+      ['Rentable','https://www.rentable.co/portland-me','Daily-updated cheapest-tier listings.'],
+      ['Roomies','https://www.roomies.com/rooms/portland-me','Rooms &amp; roommate matching — best tool here.'],
+      ['Roomster','https://roomster.com/rooms-for-rent/portland-me-usa','Room shares, often utilities-included.'],
+      ['Rent.com (rooms)','https://www.rent.com/maine/portland-rooms-for-rent','Dedicated rooms section.'],
+      ['Craigslist (Maine)','https://maine.craigslist.org/search/roo#search=1~gallery~0~0','Rooms &amp; shares — verify in person.']
+    ],
+    landlords:[
+      ['The Szanton Company','tel:+12077736400','Portland · (207) 773-6400'],
+      ['Port Property Management','tel:+12077612266','Portland · (207) 761-2266'],
+      ['Bay State Realty / Rentals','tel:+12078797900','Portland · (207) 879-7900'],
+      ['Realty Resources','tel:+12077738888','Greater Portland · (207) 773-8888']
+    ],
+    housingDefaults:[
+      {name:'Room in shared place', vals:['$850','15 min','Street/permit','Often incl.','']},
+      {name:'Half of a 2-bedroom', vals:['$1,050','20 min','$50','$60','']},
+      {name:'Studio apartment', vals:['$1,400','15 min','$75','$60','']}
+    ]
+  }
+];
+function metroById(id){ return METROS.find(m=>m.id===id) || METROS[0]; }
 
 const SEED_GOALS = [
   {label:'Security deposit',  amt:950},
@@ -631,6 +749,7 @@ function freshState(){
     schema:SCHEMA,
     moveDate:'2027-06-01',
     housingFilter:'undecided',
+    selectedMetro:'bangor',
     wage:16, hours:30,
     marginScenarioIdx:0,
     tasks:{},              // id -> {done, completedDate, notes}
@@ -705,7 +824,7 @@ function visibleTasks(){
    TABS
    ===================================================================== */
 const TABS=[
-  ['dashboard','Dashboard'],['upcoming','Now'],['timeline','Timeline'],
+  ['dashboard','Dashboard'],['timeline','Timeline'],
   ['finding','Finding a Place'],['money','Money'],
   ['inventory','Inventory'],['documents','Documents'],['inspection','Inspection'],['data','Save']
 ];
@@ -752,6 +871,9 @@ function renderDashboard(){
     {label:'Documents',sub:docsDone+' / '+SEED_DOCS.length,pct:SEED_DOCS.length?docsDone/SEED_DOCS.length:0}
   ];
   ringData.forEach(r=>rings.appendChild(ringCard(r)));
+
+  // what needs doing now
+  renderDashNow();
 
   // margin
   renderMargin();
@@ -857,98 +979,138 @@ function taskRow(t){
 }
 
 /* =====================================================================
-   UPCOMING
+   WHAT NEEDS DOING NOW (dashboard) — overdue + due-now only.
+   Everything further out lives only on the Timeline, by design.
    ===================================================================== */
-function renderUpcoming(){
-  const wrap=$('#upcoming'); wrap.innerHTML='';
-  if(!S.moveDate){wrap.appendChild(el('p','empty-hint','Set your move-in date to see what\'s coming up.'));return;}
+function timelineCallout(){
+  const wrap=el('div','dashnow-callout');
+  const a=el('button','btn sm','View full timeline →');
+  a.onclick=()=>{activeTab='timeline';render();window.scrollTo({top:0,behavior:'smooth'});};
+  wrap.appendChild(a);
+  return wrap;
+}
+function renderDashNow(){
+  const wrap=$('#dashNow'); if(!wrap) return;
+  wrap.innerHTML='';
+  if(!S.moveDate){wrap.appendChild(el('p','empty-hint','Set your move-in date to see what needs doing.'));return;}
   const today=new Date(); today.setHours(0,0,0,0);
-  const GRACE=15; // days past due before something is flagged overdue
+  const GRACE=15;
   const vis=visibleTasks();
 
-  // Build entries with real due dates + day deltas (skip completed)
+  const md=moveDateObj();
+  if(md && today > taskDueDate(0)){
+    wrap.appendChild(el('p','empty-hint','Your move date has passed — check the Inspection tab for move-in day items.'));
+    wrap.appendChild(timelineCallout());
+    return;
+  }
+
   const entries=[];
   vis.forEach(t=>{
     const st=taskState(t.id);
     if(st.done) return;
     const due=taskDueDate(t.off);
     if(!due) return;
-    entries.push({t, st, due, days: daysBetween(due, today)}); // days<0 => past due
+    entries.push({t, st, due, days: daysBetween(due, today)});
   });
-
-  // After move-in entirely?
-  const md=moveDateObj();
-  if(md && today > taskDueDate(0)){
-    wrap.appendChild(el('p','empty-hint','Your move date has passed. Check the Inspection tab for any move-in day items.'));
-    return;
-  }
-
-  // Buckets
   const overdue = entries.filter(e=> e.days < -GRACE).sort((a,b)=>a.due-b.due);
   const dueNow  = entries.filter(e=> e.days >= -GRACE && e.days <= 45).sort((a,b)=>a.due-b.due);
-  const ahead   = entries.filter(e=> e.days > 45).sort((a,b)=>a.due-b.due);
 
-  const fmt = d => d.toLocaleDateString(undefined,{month:'short',year:'numeric'});
   const rowFor = e => {
     const it=el('div','upc-item');
     const late = e.days < 0;
-    const when = late ? `${-e.days} days past` : (e.days<=45 ? 'due soon' : fmt(e.due));
+    const when = late ? `${-e.days} days past` : 'due soon';
     it.innerHTML=`<span class="cb"><input type="checkbox"></span>
       <div class="upc-body"><div class="upc-title">${e.t.title}</div>
       <div class="upc-when ${late?'late':''}">${when}</div></div>`;
     it.querySelector('input').onchange=()=>{e.st.done=true;e.st.completedDate=new Date().toISOString().slice(0,10);save();render();};
     return it;
   };
-  const group = (title, arr, cls, showBadge) => {
+  const group = (title, arr, cls) => {
     const g=el('div','upc-group '+(cls||''));
-    g.innerHTML=`<h3>${title}${showBadge&&arr.length?` <span class="badge">${arr.length}</span>`:''}</h3>`;
-    if(!arr.length) g.appendChild(el('p','upc-empty','Nothing here right now.'));
-    else arr.forEach(e=>g.appendChild(rowFor(e)));
+    g.innerHTML=`<h3>${title}${arr.length?` <span class="badge">${arr.length}</span>`:''}</h3>`;
+    arr.forEach(e=>g.appendChild(rowFor(e)));
     return g;
   };
 
-  if(overdue.length) wrap.appendChild(group('Overdue', overdue, 'overdue', true));
-  wrap.appendChild(group('Do these now', dueNow, 'duenow', true));
-
-  // Divider, then everything that's still ahead of schedule
-  if(ahead.length){
-    const div=el('div','upc-divider','<span>↓ further out — you\'re ahead on these</span>');
-    wrap.appendChild(div);
-    wrap.appendChild(group('Coming up', ahead, 'ahead', false));
+  if(!overdue.length && !dueNow.length){
+    wrap.appendChild(el('p','dashnow-clear','Nothing due right now — you\'re on track.'));
+    wrap.appendChild(timelineCallout());
+    return;
   }
+  if(overdue.length) wrap.appendChild(group('Overdue', overdue, 'overdue'));
+  if(dueNow.length)  wrap.appendChild(group('Do these now', dueNow, 'duenow'));
+  wrap.appendChild(timelineCallout());
 }
 
 /* =====================================================================
-   HOUSING COMPARISON
+   FINDING A PLACE (metro-driven) + per-metro housing comparison
    ===================================================================== */
-function ensureHousing(){
-  if(!S.housing){
-    S.housing={
+function ensureHousing(metroId){
+  if(!S.housingByArea) S.housingByArea={};
+  // migrate legacy single-area data into bangor
+  if(S.housing && !S.housingByArea.bangor){
+    S.housingByArea.bangor={fields:S.housing.fields, options:S.housing.options};
+    delete S.housing;
+  }
+  if(!S.housingByArea[metroId]){
+    const m=metroById(metroId);
+    S.housingByArea[metroId]={
       fields:['Monthly cost','Commute','Parking','Internet','Notes'],
-      options:[
-        {name:'Room in shared place', vals:['$775','15 min','Street','Maybe incl.','']},
-        {name:'Studio apartment', vals:['$950','20 min','$40','$55','']},
-        {name:'1-bedroom apartment', vals:['$1,100','15 min','Included','$55','']}
-      ]
+      options:JSON.parse(JSON.stringify(m.housingDefaults))
     };
   }
+  return S.housingByArea[metroId];
+}
+function renderFinding(){
+  const sel=$('#metroSelect');
+  if(sel && !sel.dataset.built){
+    METROS.forEach(m=>{const o=el('option',null,m.label);o.value=m.id;sel.appendChild(o);});
+    sel.dataset.built='1';
+    sel.onchange=()=>changeMetro(sel.value);
+  }
+  if(sel) sel.value=S.selectedMetro;
+
+  const m=metroById(S.selectedMetro);
+  const body=$('#metroBody');
+  if(body){
+    let html='';
+    html+=`<p class="section-intro" style="margin-top:0">${m.intro}</p>`;
+    html+='<div class="ftable"><div class="frow fhead"><div>Type</div><div>Realistic monthly range</div><div>Plan around</div></div>';
+    m.ranges.forEach(r=>{ html+=`<div class="frow"><div><strong>${r[0]}</strong><span class="fsub">${r[1]}</span></div><div>${r[2]}</div><div>${r[3]}</div></div>`; });
+    html+='</div>';
+    html+=`<p class="margin-note" style="margin-top:14px">${m.note}</p>`;
+    html+='<h3 class="finding-h3">Where to look</h3><div class="link-grid">';
+    m.sites.forEach(s=>{ html+=`<a class="linkcard" href="${s[1]}" target="_blank" rel="noopener"><strong>${s[0]}</strong><span>${s[2]}</span></a>`; });
+    html+='</div>';
+    html+='<h3 class="finding-h3">Local landlords &amp; property managers</h3>';
+    html+='<p class="margin-note" style="margin-top:0">Smaller managers sometimes have units that never hit the big listing sites — worth a direct call. Verify phone numbers before relying on them.</p>';
+    html+='<div class="link-grid">';
+    m.landlords.forEach(l=>{ const ext=/^https?:/.test(l[1]); html+=`<a class="linkcard" href="${l[1]}"${ext?' target="_blank" rel="noopener"':''}><strong>${l[0]}</strong><span>${l[2]}</span></a>`; });
+    html+='</div>';
+    html+=`<div class="data-note" style="margin-top:18px">Ranges reflect the ${m.label}-area market as of mid-2026 and will drift over time. Treat them as a sense of scale, not a quote — always confirm current prices on the listing itself.</div>`;
+    body.innerHTML=html;
+  }
+  const intro=$('#compareIntro');
+  if(intro) intro.textContent=`As you find actual places in the ${m.label} area, line them up side by side here. Each metro keeps its own separate list, so you can plan more than one area at once.`;
+  renderHousing();
 }
 function renderHousing(){
-  ensureHousing();
-  const tbl=$('#housingTable'); tbl.innerHTML='';
+  const data=ensureHousing(S.selectedMetro);
+  const tbl=$('#housingTable'); if(!tbl) return;
+  tbl.innerHTML='';
   const thead=el('thead');
   let hr='<tr><th style="min-width:120px">Location</th>';
-  S.housing.fields.forEach(f=>hr+=`<th>${f}</th>`);
+  data.fields.forEach(f=>hr+=`<th>${f}</th>`);
   hr+='<th class="del-col"></th></tr>';
   thead.innerHTML=hr; tbl.appendChild(thead);
   const tb=el('tbody');
-  S.housing.options.forEach((opt,oi)=>{
+  data.options.forEach((opt,oi)=>{
     const tr=el('tr');
     const nameTd=el('td');
     const ni=el('input'); ni.type='text'; ni.value=opt.name;
     ni.oninput=e=>{opt.name=e.target.value;save();};
     nameTd.appendChild(ni); tr.appendChild(nameTd);
-    S.housing.fields.forEach((f,fi)=>{
+    data.fields.forEach((f,fi)=>{
       const td=el('td');
       const inp=el('input'); inp.type='text'; inp.value=opt.vals[fi]||'';
       inp.oninput=e=>{opt.vals[fi]=e.target.value;save();};
@@ -956,12 +1118,56 @@ function renderHousing(){
     });
     const dtd=el('td','del-col');
     const x=el('button','del-x','×'); x.title='Remove';
-    x.onclick=()=>{S.housing.options.splice(oi,1);save();renderHousing();};
+    x.onclick=()=>{data.options.splice(oi,1);save();renderHousing();};
     dtd.appendChild(x); tr.appendChild(dtd);
     tb.appendChild(tr);
   });
   tbl.appendChild(tb);
 }
+
+/* The five budget rows the metro drives, by stable key. */
+const METRO_DRIVEN_KEYS=['rent','utilities','renterIns','bus','autoIns'];
+function budgetRowByKey(key){ return S.budget.rows.find(r=>r.key===key); }
+
+/* Compare current budget values for driven rows against the PREVIOUS metro's
+   defaults. Returns the list of rows the user appears to have hand-edited. */
+function editedDrivenRows(fromMetroId){
+  const prev=metroById(fromMetroId).budget;
+  const edited=[];
+  METRO_DRIVEN_KEYS.forEach(key=>{
+    const row=budgetRowByKey(key); if(!row||!prev[key]) return;
+    const matchesDefault = row.vals.every((v,i)=> Number(v)===Number(prev[key][i]));
+    if(!matchesDefault) edited.push(row);
+  });
+  return edited;
+}
+function setDrivenRows(toMetroId){
+  const next=metroById(toMetroId).budget;
+  METRO_DRIVEN_KEYS.forEach(key=>{
+    const row=budgetRowByKey(key); if(!row||!next[key]) return;
+    row.vals=next[key].slice();
+  });
+}
+/* Called when the dropdown changes. Honors hand-edits via a confirm dialog. */
+function changeMetro(toMetroId){
+  const from=S.selectedMetro;
+  S.selectedMetro=toMetroId;
+  if(from===toMetroId){ save(); renderFinding(); return; }
+  const edited=editedDrivenRows(from);
+  if(edited.length===0){
+    setDrivenRows(toMetroId); save(); renderFinding(); renderBudget(); renderMargin(); renderDashboardLite();
+    return;
+  }
+  // Some driven rows look hand-edited — ask before overwriting.
+  pendingMetroChange={to:toMetroId};
+  const names=edited.map(r=>r.label).join(', ');
+  $('#metroModalText').innerHTML=`You've changed some budget figures that the metro normally sets: <strong>${names}</strong>.<br><br>Switching to <strong>${metroById(toMetroId).label}</strong> can update these to that area's typical numbers, or keep your edits.`;
+  $('#metroModal').classList.add('open');
+  // render finding now so the dropdown + ranges reflect the new metro immediately;
+  // budget waits on the user's choice
+  save(); renderFinding();
+}
+let pendingMetroChange=null;
 
 /* =====================================================================
    BUDGET
@@ -1194,9 +1400,8 @@ function render(){
   buildTabs(); showPanel();
   switch(activeTab){
     case 'dashboard': renderDashboard(); break;
-    case 'upcoming': renderUpcoming(); break;
     case 'timeline': renderHousingToggle(); renderTimeline(); break;
-    case 'finding': renderHousing(); break;
+    case 'finding': renderFinding(); break;
     case 'money': renderBudget(); renderMargin(); renderGoals(); renderTxns(); break;
     case 'inventory': renderInventory(); break;
     case 'documents': renderChecklist('#documents',SEED_DOCS,S.docs); break;
@@ -1213,7 +1418,7 @@ $('#wage').oninput=e=>{S.wage=+e.target.value||0;save();renderMargin();};
 $('#hours').oninput=e=>{S.hours=+e.target.value||0;save();renderMargin();};
 $('#marginScenario').onchange=e=>{S.marginScenarioIdx=+e.target.value;save();renderMargin();};
 
-$('#addHousing').onclick=()=>{ensureHousing();S.housing.options.push({name:'New location',vals:S.housing.fields.map(()=>'')});save();renderHousing();};
+$('#addHousing').onclick=()=>{const d=ensureHousing(S.selectedMetro);d.options.push({name:'New location',vals:d.fields.map(()=>'')});save();renderHousing();};
 $('#addBudgetRow').onclick=()=>{S.budget.rows.push({label:'New expense',vals:S.budget.scenarios.map(()=>0)});save();renderBudget();renderMargin();};
 $('#addScenario').onclick=()=>{S.budget.scenarios.push('Scenario '+(S.budget.scenarios.length+1));S.budget.rows.forEach(r=>r.vals.push(0));save();renderBudget();renderMargin();};
 $('#addGoal').onclick=()=>{S.goals.push({label:'New goal',amt:0});save();renderGoals();};
@@ -1241,6 +1446,18 @@ $('#resetAnyway').onclick=()=>{
   S=freshState(); save(); $('#resetModal').classList.remove('open'); activeTab='dashboard'; buildTabs(); render(); toast('Everything reset');
 };
 $('#resetModal').onclick=e=>{if(e.target.id==='resetModal')$('#resetModal').classList.remove('open');};
+
+$('#metroUpdate').onclick=()=>{
+  if(pendingMetroChange){ setDrivenRows(pendingMetroChange.to); }
+  pendingMetroChange=null; $('#metroModal').classList.remove('open');
+  save(); renderBudget(); renderMargin(); renderDashboardLite(); renderFinding();
+  toast('Budget updated for this area');
+};
+$('#metroKeep').onclick=()=>{
+  pendingMetroChange=null; $('#metroModal').classList.remove('open');
+  toast('Kept your budget edits');
+};
+$('#metroModal').onclick=e=>{if(e.target.id==='metroModal'){pendingMetroChange=null;$('#metroModal').classList.remove('open');}};
 
 $('#findingJump').onclick=e=>{e.preventDefault();activeTab='finding';render();window.scrollTo({top:0,behavior:'smooth'});};
 
