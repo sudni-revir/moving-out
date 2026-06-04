@@ -476,8 +476,8 @@ footer.foot{max-width:var(--maxw);margin:30px auto 0;padding:18px;color:var(--in
 /* =====================================================================
    STATE + SEED DATA
    ===================================================================== */
-const SCHEMA = 7;
-const KEY = 'moveoutPlanner.v7';
+const SCHEMA = 8;
+const KEY = 'moveoutPlanner.v8';
 
 const HOUSING_TYPES = [
   {id:'undecided', label:'Undecided'},
@@ -561,10 +561,10 @@ const SEED_BUDGET = {
     {label:'Utilities',          key:'utilities', vals:[80, 150]},
     {label:'Internet',           vals:[25, 55]},
     {label:'Groceries',          vals:[320, 350]},
-    {label:'Car: gas & upkeep',  vals:[170, 170]},
+    {label:'Car: gas & upkeep',  vals:[200, 200]},
     {label:'Auto insurance',     key:'autoIns',   vals:[90, 90]},
     {label:'Bus / transit pass', key:'bus',       vals:[0, 0]},
-    {label:'Phone',              vals:[55, 55]},
+    {label:'Phone',              vals:[0, 0]},
     {label:'Renter insurance',   key:'renterIns', vals:[14, 16]},
     {label:'Misc / buffer',      vals:[120, 120]}
   ]
@@ -1045,21 +1045,40 @@ function renderDashNow(){
 /* =====================================================================
    FINDING A PLACE (metro-driven) + per-metro housing comparison
    ===================================================================== */
-function ensureHousing(metroId){
-  if(!S.housingByArea) S.housingByArea={};
-  // migrate legacy single-area data into bangor
-  if(S.housing && !S.housingByArea.bangor){
-    S.housingByArea.bangor={fields:S.housing.fields, options:S.housing.options};
-    delete S.housing;
+function ensureHousing(){
+  // One shared comparison list across all metros (cross-market by design).
+  if(!S.housing){
+    // migrate from older per-area structure if present
+    if(S.housingByArea){
+      const merged=[];
+      Object.keys(S.housingByArea).forEach(area=>{
+        const a=S.housingByArea[area];
+        const label=(metroById(area)||{}).label||area;
+        (a.options||[]).forEach(o=>{
+          // prepend area label into name if not already obvious
+          merged.push({name:o.name, vals:[label, ...(o.vals||[])]});
+        });
+      });
+      S.housing={
+        fields:['Metro / area','Monthly cost','Commute','Parking','Internet','Notes'],
+        options: merged.length?merged:defaultHousingRows()
+      };
+      delete S.housingByArea;
+    }else{
+      S.housing={
+        fields:['Metro / area','Monthly cost','Commute','Parking','Internet','Notes'],
+        options:defaultHousingRows()
+      };
+    }
   }
-  if(!S.housingByArea[metroId]){
-    const m=metroById(metroId);
-    S.housingByArea[metroId]={
-      fields:['Monthly cost','Commute','Parking','Internet','Notes'],
-      options:JSON.parse(JSON.stringify(m.housingDefaults))
-    };
-  }
-  return S.housingByArea[metroId];
+  return S.housing;
+}
+function defaultHousingRows(){
+  return [
+    {name:'Room in shared place', vals:['Bangor','$775','15 min','Street','Maybe incl.','']},
+    {name:'Studio apartment',     vals:['Portland','$1,400','15 min','$75','$60','']},
+    {name:'1-bedroom apartment',  vals:['Lewiston/Auburn','$1,100','10 min','Street','$55','']}
+  ];
 }
 function renderFinding(){
   const sel=$('#metroSelect');
@@ -1091,15 +1110,15 @@ function renderFinding(){
     body.innerHTML=html;
   }
   const intro=$('#compareIntro');
-  if(intro) intro.textContent=`As you find actual places in the ${m.label} area, line them up side by side here. Each metro keeps its own separate list, so you can plan more than one area at once.`;
+  if(intro) intro.textContent='One shared list across every metro, so you can compare places in different areas side by side. Use the Metro / area column to tag each row.';
   renderHousing();
 }
 function renderHousing(){
-  const data=ensureHousing(S.selectedMetro);
+  const data=ensureHousing();
   const tbl=$('#housingTable'); if(!tbl) return;
   tbl.innerHTML='';
   const thead=el('thead');
-  let hr='<tr><th style="min-width:120px">Location</th>';
+  let hr='<tr><th style="min-width:110px">Location</th>';
   data.fields.forEach(f=>hr+=`<th>${f}</th>`);
   hr+='<th class="del-col"></th></tr>';
   thead.innerHTML=hr; tbl.appendChild(thead);
@@ -1418,7 +1437,7 @@ $('#wage').oninput=e=>{S.wage=+e.target.value||0;save();renderMargin();};
 $('#hours').oninput=e=>{S.hours=+e.target.value||0;save();renderMargin();};
 $('#marginScenario').onchange=e=>{S.marginScenarioIdx=+e.target.value;save();renderMargin();};
 
-$('#addHousing').onclick=()=>{const d=ensureHousing(S.selectedMetro);d.options.push({name:'New location',vals:d.fields.map(()=>'')});save();renderHousing();};
+$('#addHousing').onclick=()=>{const d=ensureHousing();d.options.push({name:'New location',vals:d.fields.map(()=>'')});save();renderHousing();};
 $('#addBudgetRow').onclick=()=>{S.budget.rows.push({label:'New expense',vals:S.budget.scenarios.map(()=>0)});save();renderBudget();renderMargin();};
 $('#addScenario').onclick=()=>{S.budget.scenarios.push('Scenario '+(S.budget.scenarios.length+1));S.budget.rows.forEach(r=>r.vals.push(0));save();renderBudget();renderMargin();};
 $('#addGoal').onclick=()=>{S.goals.push({label:'New goal',amt:0});save();renderGoals();};
