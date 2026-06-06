@@ -318,7 +318,7 @@ footer.foot{max-width:var(--maxw);margin:30px auto 0;padding:18px;color:var(--in
         <div style="flex:1 1 160px"><label class="field">Compare against</label><select id="marginScenario"></select></div>
       </div>
       <div class="margin-box">
-        <div class="margin-fig"><div class="label">Est. monthly income</div><div class="v" id="mIncome">$0</div></div>
+        <div class="margin-fig"><div class="label">Est. monthly take-home</div><div class="v" id="mIncome">$0</div></div>
         <div class="margin-fig"><div class="label">Scenario expenses</div><div class="v" id="mExpense">$0</div></div>
         <div class="margin-fig result"><div class="label">Monthly margin</div><div class="v" id="mMargin">$0</div></div>
       </div>
@@ -476,8 +476,8 @@ footer.foot{max-width:var(--maxw);margin:30px auto 0;padding:18px;color:var(--in
 /* =====================================================================
    STATE + SEED DATA
    ===================================================================== */
-const SCHEMA = 8;
-const KEY = 'moveoutPlanner.v8';
+const SCHEMA = 9;
+const KEY = 'moveoutPlanner.v9';
 
 const HOUSING_TYPES = [
   {id:'undecided', label:'Undecided'},
@@ -706,11 +706,12 @@ const METROS = [
 function metroById(id){ return METROS.find(m=>m.id===id) || METROS[0]; }
 
 const SEED_GOALS = [
-  {label:'Security deposit',  amt:950},
-  {label:'First month rent',  amt:950},
-  {label:'Emergency cushion', amt:1500},
-  {label:'Furniture & basics',amt:800},
-  {label:'Moving costs',      amt:300}
+  {label:'Security deposit',   amt:950},
+  {label:'First month rent',   amt:950},
+  {label:"Last month's rent",  amt:950},
+  {label:'Emergency cushion',  amt:1500},
+  {label:'Furniture & basics', amt:800},
+  {label:'Moving costs',       amt:300}
 ];
 
 const SEED_INVENTORY = {
@@ -750,7 +751,7 @@ function freshState(){
     moveDate:'2027-06-01',
     housingFilter:'undecided',
     selectedMetro:'bangor',
-    wage:16, hours:30,
+    wage:15.10, hours:30,
     marginScenarioIdx:0,
     tasks:{},              // id -> {done, completedDate, notes}
     collapsed:{},          // monthKey -> bool
@@ -897,7 +898,9 @@ function renderMargin(){
   if(S.marginScenarioIdx>=S.budget.scenarios.length)S.marginScenarioIdx=0;
   sel.value=S.marginScenarioIdx;
   $('#wage').value=S.wage; $('#hours').value=S.hours;
-  const income=(+S.wage||0)*(+S.hours||0)*52/12;
+  const TAX_RATE=0.135; // approx combined FICA + federal + Maine at this income level
+  const gross=(+S.wage||0)*(+S.hours||0)*52/12;
+  const income=gross*(1-TAX_RATE);
   const expense=scenarioTotal(S.marginScenarioIdx);
   const margin=income-expense;
   $('#mIncome').textContent=money(income);
@@ -905,9 +908,11 @@ function renderMargin(){
   const mv=$('#mMargin'); mv.textContent=(margin>=0?'+':'−')+money(Math.abs(margin));
   mv.className='v '+(margin>=0?'pos':'neg');
   const note=$('#marginNote');
-  if(margin>=200) note.textContent='Comfortable margin — room for surprises and saving.';
-  else if(margin>=0) note.textContent='Tight but workable. Little buffer for emergencies — watch it closely.';
-  else note.textContent='This scenario costs more than you earn. Cut expenses, raise income, or pick a cheaper option.';
+  let msg;
+  if(margin>=200) msg='Comfortable margin — room for surprises and saving.';
+  else if(margin>=0) msg='Tight but workable. Little buffer for emergencies — watch it closely.';
+  else msg='This scenario costs more than you take home. Cut expenses, raise income, or pick a cheaper option.';
+  note.innerHTML=msg+` <span style="color:var(--ink-faint)">Income shown is after roughly ${Math.round(TAX_RATE*100)}% in estimated payroll, federal, and Maine taxes (≈${money(gross)} gross). Your real take-home will vary.</span>`;
 }
 
 /* =====================================================================
